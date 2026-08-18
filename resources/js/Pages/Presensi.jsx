@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useForm } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import AppLayout from "./Layouts/AppLayout";
 import toast from "react-hot-toast";
-import { Camera, SwitchCamera, X, Check, RotateCcw } from "lucide-react";
 
-function Presensi({ presensi, today }) {
+function Presensi({ presensi, today, riwayat }) {
     const [jam, setJam] = useState(new Date());
     const [lokasi, setLokasi] = useState(null);
+    const [loadingLokasi, setLoadingLokasi] = useState(true);
     const [jenisAbsen, setJenisAbsen] = useState(null);
     const [fotoDatang, setFotoDatang] = useState(null);
     const [fotoPulang, setFotoPulang] = useState(null);
@@ -15,14 +15,39 @@ function Presensi({ presensi, today }) {
     const [showKamera, setShowKamera] = useState(false);
     const [previewFoto, setPreviewFoto] = useState(null);
     const [facingMode, setFacingMode] = useState("environment");
+    const [processing, setProcessing] = useState(false);
+    const [batalkanProcessing, setBatalkanProcessing] = useState(false);
     const videoRef = useRef(null);
     const streamRef = useRef(null);
-
-    const { post, processing } = useForm();
 
     useEffect(() => {
         const interval = setInterval(() => setJam(new Date()), 1000);
         return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLokasi({
+                        lat: position.coords.latitude,
+                        long: position.coords.longitude,
+                    });
+                    setLoadingLokasi(false);
+                    toast.success("Lokasi berhasil didapat");
+                },
+                () => {
+                    setLoadingLokasi(false);
+                    toast.error(
+                        "Gagal mendapatkan lokasi, klik Ambil Lokasi untuk coba lagi",
+                    );
+                },
+                { enableHighAccuracy: true, timeout: 10000 },
+            );
+        } else {
+            setLoadingLokasi(false);
+            toast.error("Browser tidak mendukung GPS");
+        }
     }, []);
 
     useEffect(() => {
@@ -31,12 +56,31 @@ function Presensi({ presensi, today }) {
                 setFotoDatang(`/storage/${presensi.foto_datang}`);
             if (presensi.foto_pulang)
                 setFotoPulang(`/storage/${presensi.foto_pulang}`);
-            if (presensi.jam_datang) setJamDatang(presensi.jam_datang);
-            if (presensi.jam_pulang) setJamPulang(presensi.jam_pulang);
+            if (presensi.jam_datang) {
+                const tgl = new Date(presensi.jam_datang);
+                setJamDatang(
+                    tgl.toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                    }),
+                );
+            }
+            if (presensi.jam_pulang) {
+                const tgl = new Date(presensi.jam_pulang);
+                setJamPulang(
+                    tgl.toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                    }),
+                );
+            }
         }
     }, [presensi]);
 
     const getLokasi = () => {
+        setLoadingLokasi(true);
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -44,14 +88,17 @@ function Presensi({ presensi, today }) {
                         lat: position.coords.latitude,
                         long: position.coords.longitude,
                     });
+                    setLoadingLokasi(false);
                     toast.success("Lokasi berhasil didapat");
                 },
                 () => {
+                    setLoadingLokasi(false);
                     toast.error("Gagal mendapatkan lokasi");
                 },
                 { enableHighAccuracy: true, timeout: 10000 },
             );
         } else {
+            setLoadingLokasi(false);
             toast.error("Browser tidak mendukung GPS");
         }
     };
@@ -112,7 +159,6 @@ function Presensi({ presensi, today }) {
             streamRef.current = null;
         }
         setShowKamera(false);
-        setJenisAbsen(null);
     };
 
     const ambilFoto = () => {
@@ -145,7 +191,9 @@ function Presensi({ presensi, today }) {
         tutupKamera();
     };
 
-    const submitAbsen = () => {
+    const submitAbsen = async () => {
+        if (processing) return;
+
         if (!previewFoto) {
             toast.error("Foto wajib diambil");
             return;
@@ -156,59 +204,77 @@ function Presensi({ presensi, today }) {
             return;
         }
 
-        const formData = new FormData();
-        formData.append("tanggal", today);
-        formData.append("status", "normal");
+        setProcessing(true);
 
-        if (jenisAbsen === "datang") {
-            formData.append("jam_datang", jam.toTimeString().slice(0, 8));
-            formData.append("lat_datang", lokasi.lat.toString());
-            formData.append("long_datang", lokasi.long.toString());
-        } else {
-            formData.append("jam_pulang", jam.toTimeString().slice(0, 8));
-            formData.append("lat_pulang", lokasi.lat.toString());
-            formData.append("long_pulang", lokasi.long.toString());
+        try {
+            const blob = await fetch(previewFoto).then((res) => res.blob());
+
+            const formData = new FormData();
+            formData.append("tanggal", today);
+            formData.append("status", "normal");
+
+            if (jenisAbsen === "datang") {
+                formData.append("jam_datang", jam.toTimeString().slice(0, 8));
+                formData.append("lat_datang", lokasi.lat.toString());
+                formData.append("long_datang", lokasi.long.toString());
+                formData.append("foto_datang", blob, "datang.jpg");
+            } else {
+                formData.append("jam_pulang", jam.toTimeString().slice(0, 8));
+                formData.append("lat_pulang", lokasi.lat.toString());
+                formData.append("long_pulang", lokasi.long.toString());
+                formData.append("foto_pulang", blob, "pulang.jpg");
+            }
+
+            router.post("/presensi", formData, {
+                forceFormData: true,
+                onSuccess: () => {
+                    toast.success(`Absen ${jenisAbsen} berhasil disimpan`);
+                    setTimeout(() => window.location.reload(), 1000);
+                },
+                onError: () => {
+                    toast.error("Gagal menyimpan absen");
+                    setProcessing(false);
+                },
+            });
+        } catch (error) {
+            toast.error("Gagal menyimpan absen");
+            setProcessing(false);
+        }
+    };
+
+    const batalkanAbsen = () => {
+        if (batalkanProcessing) return;
+
+        if (!presensi?.id) {
+            toast.error("Tidak ada absen hari ini");
+            return;
         }
 
-        fetch(previewFoto)
-            .then((res) => res.blob())
-            .then((blob) => {
-                if (jenisAbsen === "datang") {
-                    formData.append("foto_datang", blob, "datang.jpg");
-                } else {
-                    formData.append("foto_pulang", blob, "pulang.jpg");
-                }
+        if (!confirm("Yakin ingin batalkan absen hari ini?")) return;
 
-                post("/presensi", {
-                    data: formData,
-                    forceFormData: true,
-                    onSuccess: () => {
-                        toast.success(`Absen ${jenisAbsen} berhasil disimpan`);
-                        if (jenisAbsen === "datang") {
-                            setFotoDatang(previewFoto);
-                            setJamDatang(jam.toTimeString().slice(0, 8));
-                        } else {
-                            setFotoPulang(previewFoto);
-                            setJamPulang(jam.toTimeString().slice(0, 8));
-                        }
-                        setPreviewFoto(null);
-                        setJenisAbsen(null);
-                    },
-                    onError: () => {
-                        toast.error("Gagal menyimpan absen");
-                    },
-                });
-            });
+        setBatalkanProcessing(true);
+
+        router.delete(`/presensi/${presensi.id}`, {
+            onSuccess: () => {
+                toast.success("Absen berhasil dibatalkan");
+                setTimeout(() => window.location.reload(), 1000);
+            },
+            onError: () => {
+                toast.error("Gagal membatalkan absen");
+                setBatalkanProcessing(false);
+            },
+        });
     };
 
     const ulangiFoto = () => {
+        if (processing) return;
         bukaKamera(jenisAbsen);
     };
 
     return (
         <>
             <div className="max-w-2xl mx-auto space-y-4">
-                {/* Info Jam & Lokasi (kecil) */}
+                {/* Info Jam & Lokasi */}
                 <div
                     className="rounded-2xl px-4 py-3 text-white"
                     style={{
@@ -242,10 +308,15 @@ function Presensi({ presensi, today }) {
                         </div>
                         <button
                             onClick={getLokasi}
-                            className="px-4 py-2 rounded-full text-xs font-semibold text-white transition-all"
+                            disabled={loadingLokasi}
+                            className="px-4 py-2 rounded-full text-xs font-semibold text-white transition-all disabled:opacity-50"
                             style={{ background: "rgba(255,255,255,0.2)" }}
                         >
-                            {lokasi ? "Ambil Lokasi Ulang" : "Ambil Lokasi"}
+                            {loadingLokasi
+                                ? "Mencari..."
+                                : lokasi
+                                  ? "Ambil Lokasi Ulang"
+                                  : "Ambil Lokasi"}
                         </button>
                     </div>
                     <p
@@ -318,7 +389,7 @@ function Presensi({ presensi, today }) {
                     </div>
                 )}
 
-                {/* Preview Foto + Tombol Submit/Ulangi */}
+                {/* Preview Foto */}
                 {previewFoto && !showKamera && (
                     <div
                         className="bg-white rounded-2xl p-4"
@@ -380,7 +451,8 @@ function Presensi({ presensi, today }) {
                             </button>
                             <button
                                 onClick={ulangiFoto}
-                                className="flex-1 py-2.5 rounded-full text-sm font-semibold"
+                                disabled={processing}
+                                className="flex-1 py-2.5 rounded-full text-sm font-semibold disabled:opacity-50"
                                 style={{
                                     background: "#F0FDFA",
                                     color: "#0D7377",
@@ -392,7 +464,7 @@ function Presensi({ presensi, today }) {
                     </div>
                 )}
 
-                {/* Tombol Absen Atas Bawah */}
+                {/* Card Absen */}
                 {!showKamera && !previewFoto && (
                     <div className="space-y-3">
                         {/* Absen Datang */}
@@ -406,19 +478,32 @@ function Presensi({ presensi, today }) {
                                 className="font-bold text-sm mb-2"
                                 style={{ color: "#1F2937" }}
                             >
-                                Absen Datang
+                                Presensi Datang
                             </h3>
                             {fotoDatang ? (
                                 <>
                                     <img
                                         src={fotoDatang}
                                         alt="Datang"
-                                        className="w-full h-32 object-cover rounded-xl mb-2"
+                                        className="w-full h-40 object-cover rounded-xl mb-2"
                                     />
                                     <div className="space-y-1 mb-2">
                                         <div className="flex justify-between items-center text-xs">
                                             <span style={{ color: "#9CA3AF" }}>
-                                                Waktu
+                                                Tanggal
+                                            </span>
+                                            <span
+                                                className="font-semibold"
+                                                style={{ color: "#1F2937" }}
+                                            >
+                                                {presensi?.hari
+                                                    ? `${presensi.hari}, ${presensi.tanggal_format}`
+                                                    : "-"}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span style={{ color: "#9CA3AF" }}>
+                                                Jam
                                             </span>
                                             <span
                                                 className="font-semibold"
@@ -435,8 +520,8 @@ function Presensi({ presensi, today }) {
                                                 className="font-semibold"
                                                 style={{ color: "#1F2937" }}
                                             >
-                                                {lokasi
-                                                    ? `${lokasi.lat}, ${lokasi.long}`
+                                                {presensi?.lat_datang
+                                                    ? `${presensi.lat_datang}, ${presensi.long_datang}`
                                                     : "-"}
                                             </span>
                                         </div>
@@ -479,19 +564,32 @@ function Presensi({ presensi, today }) {
                                 className="font-bold text-sm mb-2"
                                 style={{ color: "#1F2937" }}
                             >
-                                Absen Pulang
+                                Presensi Pulang
                             </h3>
                             {fotoPulang ? (
                                 <>
                                     <img
                                         src={fotoPulang}
                                         alt="Pulang"
-                                        className="w-full h-32 object-cover rounded-xl mb-2"
+                                        className="w-full h-40 object-cover rounded-xl mb-2"
                                     />
                                     <div className="space-y-1 mb-2">
                                         <div className="flex justify-between items-center text-xs">
                                             <span style={{ color: "#9CA3AF" }}>
-                                                Waktu
+                                                Tanggal
+                                            </span>
+                                            <span
+                                                className="font-semibold"
+                                                style={{ color: "#1F2937" }}
+                                            >
+                                                {presensi?.hari
+                                                    ? `${presensi.hari}, ${presensi.tanggal_format}`
+                                                    : "-"}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span style={{ color: "#9CA3AF" }}>
+                                                Jam
                                             </span>
                                             <span
                                                 className="font-semibold"
@@ -508,8 +606,8 @@ function Presensi({ presensi, today }) {
                                                 className="font-semibold"
                                                 style={{ color: "#1F2937" }}
                                             >
-                                                {lokasi
-                                                    ? `${lokasi.lat}, ${lokasi.long}`
+                                                {presensi?.lat_pulang
+                                                    ? `${presensi.lat_pulang}, ${presensi.long_pulang}`
                                                     : "-"}
                                             </span>
                                         </div>
@@ -540,8 +638,109 @@ function Presensi({ presensi, today }) {
                                 </button>
                             )}
                         </div>
+
+                        {/* Tombol Batalkan */}
+                        {presensi && (fotoDatang || fotoPulang) && (
+                            <button
+                                onClick={batalkanAbsen}
+                                disabled={batalkanProcessing}
+                                className="w-full py-2.5 rounded-full text-xs font-semibold text-red-600 disabled:opacity-50"
+                                style={{ background: "#FEE2E2" }}
+                            >
+                                {batalkanProcessing
+                                    ? "Membatalkan..."
+                                    : "Batalkan Semua Presensi Hari Ini"}
+                            </button>
+                        )}
                     </div>
                 )}
+
+                {/* Riwayat Presensi */}
+                <div
+                    className="bg-white rounded-2xl p-4"
+                    style={{ boxShadow: "0 8px 20px rgba(13,115,119,0.08)" }}
+                >
+                    <h3
+                        className="font-bold text-sm mb-3"
+                        style={{ color: "#1F2937" }}
+                    >
+                        Riwayat Presensi
+                    </h3>
+                    {riwayat?.length === 0 || !riwayat ? (
+                        <p
+                            className="text-xs text-center py-4"
+                            style={{ color: "#9CA3AF" }}
+                        >
+                            Belum ada riwayat presensi
+                        </p>
+                    ) : (
+                        <div className="space-y-2">
+                            {riwayat.map((item, index) => (
+                                <div
+                                    key={index}
+                                    className="py-2 border-b last:border-0"
+                                    style={{ borderColor: "#F0FDFA" }}
+                                >
+                                    <div className="flex justify-between items-center text-xs mb-1">
+                                        <span style={{ color: "#9CA3AF" }}>
+                                            Tanggal
+                                        </span>
+                                        <span
+                                            className="font-semibold"
+                                            style={{ color: "#1F2937" }}
+                                        >
+                                            {item.hari
+                                                ? `${item.hari}, ${item.tanggal}`
+                                                : item.tanggal}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs mb-1">
+                                        <span style={{ color: "#9CA3AF" }}>
+                                            Datang
+                                        </span>
+                                        <span
+                                            className="font-semibold"
+                                            style={{ color: "#1F2937" }}
+                                        >
+                                            {item.jam_datang}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs mb-1">
+                                        <span style={{ color: "#9CA3AF" }}>
+                                            Pulang
+                                        </span>
+                                        <span
+                                            className="font-semibold"
+                                            style={{ color: "#1F2937" }}
+                                        >
+                                            {item.jam_pulang}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span style={{ color: "#9CA3AF" }}>
+                                            Status
+                                        </span>
+                                        <span
+                                            className="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold"
+                                            style={{
+                                                background:
+                                                    item.status === "Lengkap"
+                                                        ? "#DCFCE7"
+                                                        : "#FEF3C7",
+                                                color:
+                                                    item.status === "Lengkap"
+                                                        ? "#16A34A"
+                                                        : "#D97706",
+                                            }}
+                                        >
+                                            {item.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </>
     );

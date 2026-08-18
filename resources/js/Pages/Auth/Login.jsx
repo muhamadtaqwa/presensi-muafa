@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 import { useForm } from "@inertiajs/react";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, LogIn, GraduationCap } from "lucide-react";
+import { Eye, EyeOff, GraduationCap } from "lucide-react";
 
 export default function Login() {
-    const { data, setData, post, processing } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         username: "",
         password: "",
     });
 
     const [showPassword, setShowPassword] = useState(false);
+    const [showLupa, setShowLupa] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         post("/login", {
             onSuccess: (page) => {
-                // Cek apakah ada error dari server
                 if (
                     page.props.errors &&
                     Object.keys(page.props.errors).length > 0
@@ -38,7 +38,7 @@ export default function Login() {
 
     return (
         <div
-            className="min-h-screen flex items-center justify-center p-4"
+            className="relative min-h-screen overflow-hidden flex items-center justify-center p-6"
             style={{
                 background:
                     "linear-gradient(135deg, #0D7377 0%, #14B8A6 50%, #2DD4BF 100%)",
@@ -46,9 +46,19 @@ export default function Login() {
                     "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
             }}
         >
-            <div className="w-full max-w-md">
+            {/* Dekorasi blur */}
+            <div
+                className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"
+                aria-hidden="true"
+            />
+            <div
+                className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"
+                aria-hidden="true"
+            />
+
+            <div className="relative w-full max-w-sm">
                 {/* Logo & Title */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-6">
                     <div
                         className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-4"
                         style={{
@@ -59,34 +69,37 @@ export default function Login() {
                     >
                         <GraduationCap size={40} color="#fff" />
                     </div>
-                    <h1 className="text-3xl font-bold text-white">
+                    <h1 className="text-2xl font-bold text-white">
                         Presensi Muafa
                     </h1>
                     <p
-                        className="text-sm mt-2"
+                        className="text-sm mt-1"
                         style={{ color: "rgba(255,255,255,0.7)" }}
                     >
-                        Sistem Presensi Guru
+                        Sistem Presensi Digital
                     </p>
                 </div>
 
                 {/* Login Card */}
-                <div
-                    className="bg-white rounded-3xl p-8"
-                    style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}
-                >
+                <div className="bg-white rounded-[28px] p-7 shadow-2xl">
                     <h2
-                        className="text-xl font-bold text-center mb-6"
+                        className="text-xl font-bold text-center mb-5"
                         style={{ color: "#1F2937" }}
                     >
                         Selamat Datang
                     </h2>
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                    {errors.auth && (
+                        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                            {errors.auth}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Username */}
                         <div>
                             <label
-                                className="block text-xs font-semibold mb-2"
+                                className="block text-sm font-semibold mb-2"
                                 style={{ color: "#1F2937" }}
                             >
                                 Username
@@ -114,19 +127,24 @@ export default function Login() {
                                     onChange={(e) =>
                                         setData("username", e.target.value)
                                     }
-                                    className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-100 rounded-2xl focus:border-teal-500 focus:outline-none transition-colors text-sm bg-gray-50"
+                                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-100 rounded-2xl focus:border-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-100 transition-colors text-sm bg-gray-50"
                                     placeholder="Masukkan username"
                                     required
                                     autoFocus
                                     autoComplete="username"
                                 />
                             </div>
+                            {errors.username && (
+                                <p className="mt-1.5 text-sm text-red-600">
+                                    {errors.username}
+                                </p>
+                            )}
                         </div>
 
                         {/* Password */}
                         <div>
                             <label
-                                className="block text-xs font-semibold mb-2"
+                                className="block text-sm font-semibold mb-2"
                                 style={{ color: "#1F2937" }}
                             >
                                 Password
@@ -154,7 +172,7 @@ export default function Login() {
                                     onChange={(e) =>
                                         setData("password", e.target.value)
                                     }
-                                    className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-100 rounded-2xl focus:border-teal-500 focus:outline-none transition-colors text-sm bg-gray-50"
+                                    className="w-full pl-12 pr-12 py-3 border-2 border-gray-100 rounded-2xl focus:border-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-100 transition-colors text-sm bg-gray-50"
                                     placeholder="Masukkan password"
                                     required
                                     autoComplete="current-password"
@@ -168,67 +186,86 @@ export default function Login() {
                                 >
                                     {showPassword ? (
                                         <EyeOff
-                                            size={18}
+                                            size={20}
                                             style={{ color: "#9CA3AF" }}
                                         />
                                     ) : (
                                         <Eye
-                                            size={18}
+                                            size={20}
                                             style={{ color: "#9CA3AF" }}
                                         />
                                     )}
                                 </button>
                             </div>
+                            {errors.password && (
+                                <p className="mt-1.5 text-sm text-red-600">
+                                    {errors.password}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Lupa Password */}
+                        <div className="flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setShowLupa(true)}
+                                className="text-sm text-teal-600 hover:underline"
+                            >
+                                Lupa Password?
+                            </button>
                         </div>
 
                         {/* Tombol Login */}
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full py-4 rounded-2xl text-white font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full py-3.5 rounded-2xl text-white font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             style={{
                                 background:
                                     "linear-gradient(135deg, #2DD4BF 0%, #14B8A6 50%, #0D7377 100%)",
                                 boxShadow: "0 10px 25px rgba(13,115,119,0.35)",
                             }}
                         >
-                            {processing ? (
-                                <>
-                                    <svg
-                                        className="animate-spin w-5 h-5"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                        />
-                                        <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        />
-                                    </svg>
-                                    Memproses...
-                                </>
-                            ) : (
-                                <>Login</>
-                            )}
+                            {processing ? "Sedang Login..." : "Login"}
                         </button>
                     </form>
                 </div>
 
                 <p
-                    className="text-center text-xs mt-6"
-                    style={{ color: "rgba(255,255,255,0.6)" }}
+                    className="text-center text-xs mt-5"
+                    style={{ color: "rgba(255,255,255,0.7)" }}
                 >
                     © 2026 Presensi Muafa - All rights reserved
                 </p>
             </div>
+
+            {/* Lupa Password Modal */}
+            {showLupa && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-black/50"
+                        onClick={() => setShowLupa(false)}
+                        aria-hidden="true"
+                    />
+                    <div className="relative bg-white rounded-[28px] shadow-2xl w-full max-w-sm p-7 text-center">
+                        <h3 className="font-semibold text-lg">
+                            Lupa Password?
+                        </h3>
+                        <p className="text-sm text-slate-500 mt-2">
+                            Hubungi Admin
+                        </p>
+                        <p className="text-xl font-bold text-teal-700 mt-2">
+                            08985949733
+                        </p>
+                        <button
+                            onClick={() => setShowLupa(false)}
+                            className="mt-5 w-full border border-slate-200 py-2.5 rounded-2xl text-sm hover:bg-slate-50"
+                        >
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

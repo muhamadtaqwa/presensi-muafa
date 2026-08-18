@@ -7,6 +7,7 @@ use App\Models\Presensi;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -19,9 +20,31 @@ class PresensiController extends Controller
             ->where('tanggal', $today)
             ->first();
 
+        if ($presensi) {
+            $presensi->tanggal_format = $presensi->tanggal->locale('id')->isoFormat('D MMMM YYYY');
+            $presensi->hari = $presensi->tanggal->locale('id')->isoFormat('dddd');
+            $presensi->jam_datang = $presensi->jam_datang?->format('H:i:s');
+            $presensi->jam_pulang = $presensi->jam_pulang?->format('H:i:s');
+        }
+
+        $riwayat = Presensi::where('user_id', Auth::id())
+            ->orderBy('tanggal', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'tanggal' => $p->tanggal->locale('id')->isoFormat('D MMMM YYYY'),
+                    'hari' => $p->tanggal->locale('id')->isoFormat('dddd'),
+                    'jam_datang' => $p->jam_datang?->format('H:i') ?? '-',
+                    'jam_pulang' => $p->jam_pulang?->format('H:i') ?? '-',
+                    'status' => $p->jam_datang && $p->jam_pulang ? 'Lengkap' : ($p->jam_datang ? 'Datang' : 'Belum'),
+                ];
+            });
+
         return Inertia::render('Presensi', [
             'presensi' => $presensi,
             'today' => $today,
+            'riwayat' => $riwayat,
         ]);
     }
 
@@ -68,6 +91,25 @@ class PresensiController extends Controller
         );
 
         return redirect()->route('presensi')->with('success', 'Presensi berhasil disimpan.');
+    }
+
+    public function destroy($id)
+    {
+        $presensi = Presensi::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Hapus foto dari storage
+        if ($presensi->foto_datang) {
+            Storage::disk('public')->delete($presensi->foto_datang);
+        }
+        if ($presensi->foto_pulang) {
+            Storage::disk('public')->delete($presensi->foto_pulang);
+        }
+
+        $presensi->delete();
+
+        return back()->with('success', 'Absen berhasil dibatalkan.');
     }
 
     public function exportExcel()

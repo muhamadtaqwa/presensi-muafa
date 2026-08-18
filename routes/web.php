@@ -27,6 +27,7 @@ Route::middleware(['auth'])->group(function () {
     // Presensi
     Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi');
     Route::post('/presensi', [PresensiController::class, 'store'])->name('presensi.store');
+    Route::delete('/presensi/{id}', [PresensiController::class, 'destroy'])->name('presensi.destroy');
 
     // Rekap Presensi
     Route::get('/rekap', [RekapController::class, 'index'])->name('rekap');
