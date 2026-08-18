@@ -1,11 +1,13 @@
-import React from "react";
-import { useForm } from "@inertiajs/react";
+import React, { useState } from "react";
+import { useForm, usePage, Link } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "./Layouts/AppLayout";
-import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { Eye, EyeOff, LogOut } from "lucide-react";
 
 function Setting({ errors = {} }) {
+    const { auth } = usePage().props;
+    const user = auth?.user;
+
     const { data, setData, post, processing, reset } = useForm({
         password_lama: "",
         password_baru: "",
@@ -34,23 +36,32 @@ function Setting({ errors = {} }) {
 
     return (
         <>
-            <div className="max-w-md mx-auto space-y-6">
-                {/* Header */}
+            <div className="max-w-md mx-auto space-y-4">
+                {/* Info User */}
                 <div
-                    className="rounded-3xl px-6 py-8 text-white"
+                    className="rounded-2xl px-5 py-4 text-white"
                     style={{
                         background:
-                            "linear-gradient(150deg, #2DD4BF 0%, #14B8A6 55%, #0D7377 100%)",
-                        boxShadow: "0 10px 25px rgba(13,115,119,0.25)",
+                            "linear-gradient(135deg, #2DD4BF 0%, #14B8A6 50%, #0D7377 100%)",
+                        boxShadow: "0 4px 15px rgba(13,115,119,0.2)",
                     }}
                 >
-                    <h2 className="text-2xl font-bold">Pengaturan</h2>
-                    <p
-                        className="text-sm mt-2"
-                        style={{ color: "rgba(255,255,255,0.8)" }}
-                    >
-                        Ganti password akun Anda
-                    </p>
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-white/25 flex items-center justify-center text-white font-bold text-lg">
+                            {user?.name?.charAt(0) || "M"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm truncate">
+                                {user?.name || "Pengguna"}
+                            </p>
+                            <p className="text-xs text-white/70 truncate">
+                                @{user?.username || "username"}
+                            </p>
+                            <p className="text-xs text-white/70 capitalize">
+                                {user?.role || "Role"}
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Form Ganti Password */}
@@ -183,6 +194,21 @@ function Setting({ errors = {} }) {
                         </button>
                     </form>
                 </div>
+
+                {/* Tombol Keluar (di bawah) */}
+                <Link
+                    href="/logout"
+                    method="post"
+                    as="button"
+                    className="w-full py-3 rounded-2xl text-sm font-semibold transition-all"
+                    style={{
+                        background: "#FFFFFF",
+                        color: "#DC2626",
+                        boxShadow: "0 4px 12px rgba(220,38,38,0.08)",
+                    }}
+                >
+                    Logout
+                </Link>
             </div>
         </>
     );

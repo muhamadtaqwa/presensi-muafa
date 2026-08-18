@@ -3,7 +3,7 @@ import { useForm } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, LogIn, GraduationCap } from "lucide-react";
 
-export default function Login({ errors = {} }) {
+export default function Login() {
     const { data, setData, post, processing } = useForm({
         username: "",
         password: "",
@@ -14,11 +14,24 @@ export default function Login({ errors = {} }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         post("/login", {
-            onSuccess: () => {
-                toast.success("Login berhasil!");
+            onSuccess: (page) => {
+                // Cek apakah ada error dari server
+                if (
+                    page.props.errors &&
+                    Object.keys(page.props.errors).length > 0
+                ) {
+                    toast.error(
+                        page.props.errors.username ||
+                            "Login gagal, cek username & password.",
+                    );
+                } else {
+                    toast.success("Login berhasil!");
+                }
             },
-            onError: () => {
-                toast.error("Login gagal, cek username & password.");
+            onError: (errors) => {
+                toast.error(
+                    errors.username || "Login gagal, cek username & password.",
+                );
             },
         });
     };
@@ -68,12 +81,6 @@ export default function Login({ errors = {} }) {
                     >
                         Selamat Datang
                     </h2>
-                    <p
-                        className="text-sm text-center mb-6"
-                        style={{ color: "#9CA3AF" }}
-                    >
-                        Silakan masuk untuk melanjutkan
-                    </p>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Username */}
@@ -213,34 +220,6 @@ export default function Login({ errors = {} }) {
                             )}
                         </button>
                     </form>
-
-                    {/* Info Akun */}
-                    <div
-                        className="mt-6 p-4 rounded-2xl"
-                        style={{ background: "#F0FDFA" }}
-                    >
-                        <p
-                            className="text-xs font-semibold mb-2"
-                            style={{ color: "#0D7377" }}
-                        >
-                            Akun Demo:
-                        </p>
-                        <div
-                            className="space-y-1 text-xs"
-                            style={{ color: "#9CA3AF" }}
-                        >
-                            <p>
-                                Admin:{" "}
-                                <span className="font-semibold">admin</span> /{" "}
-                                <span className="font-semibold">admin123</span>
-                            </p>
-                            <p>
-                                Guru:{" "}
-                                <span className="font-semibold">fauzi</span> /{" "}
-                                <span className="font-semibold">guru123</span>
-                            </p>
-                        </div>
-                    </div>
                 </div>
 
                 <p

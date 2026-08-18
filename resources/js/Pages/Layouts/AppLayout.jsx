@@ -5,9 +5,9 @@ import {
     Camera,
     Calendar,
     Users,
-    LogOut,
     Settings,
 } from "lucide-react";
+import LoadingSkeleton from "../../Components/LoadingSkeleton";
 
 export default function AppLayout({ children, header }) {
     const { auth } = usePage().props;
@@ -79,42 +79,10 @@ export default function AppLayout({ children, header }) {
                     "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
             }}
         >
-            {/* Header */}
-            <header
-                className="sticky top-0 z-20"
-                style={{
-                    background:
-                        "linear-gradient(135deg, #2DD4BF 0%, #14B8A6 50%, #0D7377 100%)",
-                    boxShadow: "0 4px 15px rgba(13,115,119,0.25)",
-                }}
-            >
-                <div className="flex items-center justify-between px-4 py-4">
-                    <div>
-                        <h1 className="text-white font-bold text-lg leading-tight">
-                            {header || "Presensi Muafa"}
-                        </h1>
-                        <p className="text-white/70 text-xs mt-0.5">
-                            {user?.name || "Selamat datang"}
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-white/25 flex items-center justify-center text-white font-bold text-sm">
-                            {user?.name?.charAt(0) || "M"}
-                        </div>
-                        <Link
-                            href="/logout"
-                            method="post"
-                            as="button"
-                            className="text-white/70 hover:text-white transition-colors"
-                        >
-                            <LogOut size={18} />
-                        </Link>
-                    </div>
-                </div>
-            </header>
-
             {/* Main Content */}
-            <main className="px-4 py-5 max-w-4xl mx-auto">{children}</main>
+            <main className="px-4 py-5 max-w-4xl mx-auto">
+                {children || <LoadingSkeleton />}
+            </main>
 
             {/* Bottom Navigation */}
             <nav
@@ -132,7 +100,6 @@ export default function AppLayout({ children, header }) {
                         const active = window.location.pathname === item.href;
 
                         if (item.center) {
-                            // Tombol Presensi Tengah (Mencolok)
                             return (
                                 <Link
                                     key={item.key}

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import AppLayout from "./Layouts/AppLayout";
 
-function Rekap({ guruList, presensi, filter }) {
+function Rekap({ isAdmin, guruList, presensi, filter }) {
     const [selectedGuru, setSelectedGuru] = useState(filter.user_id || "");
     const [bulan, setBulan] = useState(
         parseInt(filter.bulan) || new Date().getMonth() + 1,
@@ -50,7 +50,8 @@ function Rekap({ guruList, presensi, filter }) {
         }
         setBulan(newBulan);
         setTahun(newTahun);
-        window.location.href = `/rekap?user_id=${selectedGuru}&bulan=${newBulan}&tahun=${newTahun}`;
+        const userId = isAdmin ? selectedGuru : filter.user_id;
+        window.location.href = `/rekap?user_id=${userId}&bulan=${newBulan}&tahun=${newTahun}`;
     };
 
     const nextBulan = () => {
@@ -62,7 +63,8 @@ function Rekap({ guruList, presensi, filter }) {
         }
         setBulan(newBulan);
         setTahun(newTahun);
-        window.location.href = `/rekap?user_id=${selectedGuru}&bulan=${newBulan}&tahun=${newTahun}`;
+        const userId = isAdmin ? selectedGuru : filter.user_id;
+        window.location.href = `/rekap?user_id=${userId}&bulan=${newBulan}&tahun=${newTahun}`;
     };
 
     const getPresensiByTanggal = (tanggal) => {
@@ -85,7 +87,7 @@ function Rekap({ guruList, presensi, filter }) {
             cells.push(
                 <div
                     key={`empty-${i}`}
-                    className="h-24 border"
+                    className="h-20 border"
                     style={{ background: "#F0FDFA", borderColor: "#CCFBF1" }}
                 />,
             );
@@ -97,7 +99,7 @@ function Rekap({ guruList, presensi, filter }) {
                 <div
                     key={tanggal}
                     onClick={() => data && setSelectedDetail(data)}
-                    className="h-24 border p-1.5 transition-colors"
+                    className="h-20 border p-1 transition-colors"
                     style={{
                         borderColor: "#CCFBF1",
                         background: data ? "#FFFFFF" : "#F0FDFA",
@@ -105,20 +107,20 @@ function Rekap({ guruList, presensi, filter }) {
                     }}
                 >
                     <div
-                        className="text-xs font-semibold mb-1"
+                        className="text-[10px] font-semibold mb-0.5"
                         style={{ color: "#9CA3AF" }}
                     >
                         {tanggal}
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                         <div
-                            className={`h-1.5 rounded-full ${data?.jam_datang ? "bg-green-500" : "bg-gray-200"}`}
+                            className={`h-1 rounded-full ${data?.jam_datang ? "bg-green-500" : "bg-gray-200"}`}
                         />
                         <div
-                            className={`h-1.5 rounded-full ${data?.jam_pulang ? "bg-blue-500" : "bg-gray-200"}`}
+                            className={`h-1 rounded-full ${data?.jam_pulang ? "bg-blue-500" : "bg-gray-200"}`}
                         />
                         <div
-                            className={`h-1.5 rounded-full ${data?.keterangan ? "bg-yellow-500" : "bg-gray-200"}`}
+                            className={`h-1 rounded-full ${data?.keterangan ? "bg-yellow-500" : "bg-gray-200"}`}
                         />
                     </div>
                 </div>,
@@ -130,120 +132,116 @@ function Rekap({ guruList, presensi, filter }) {
 
     return (
         <>
-            <div className="space-y-6">
+            <div className="space-y-4">
                 {/* Header */}
-                <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                     <h2
-                        className="text-2xl font-bold"
+                        className="text-lg font-bold"
                         style={{ color: "#1F2937" }}
                     >
                         Rekap Presensi
                     </h2>
                     <div className="flex gap-2">
                         <a
-                            href={`/rekap/export-excel?user_id=${selectedGuru}&bulan=${bulan}&tahun=${tahun}`}
-                            className="px-5 py-2.5 rounded-full text-sm font-semibold transition-all"
+                            href={`/rekap/export-excel?user_id=${isAdmin ? selectedGuru : filter.user_id}&bulan=${bulan}&tahun=${tahun}`}
+                            className="px-4 py-2 rounded-full text-xs font-semibold transition-all"
                             style={{
                                 background: "#FFFFFF",
                                 color: "#0D7377",
                                 boxShadow: "0 4px 12px rgba(13,115,119,0.08)",
                             }}
                         >
-                            Export Excel
+                            Excel
                         </a>
                         <a
-                            href={`/rekap/export-pdf?user_id=${selectedGuru}&bulan=${bulan}&tahun=${tahun}`}
-                            className="px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all"
+                            href={`/rekap/export-pdf?user_id=${isAdmin ? selectedGuru : filter.user_id}&bulan=${bulan}&tahun=${tahun}`}
+                            className="px-4 py-2 rounded-full text-xs font-semibold text-white transition-all"
                             style={{
                                 background:
                                     "linear-gradient(135deg, #2DD4BF, #0D7377)",
-                                boxShadow: "0 4px 12px rgba(13,115,119,0.3)",
                             }}
                         >
-                            Export PDF
+                            PDF
                         </a>
                     </div>
                 </div>
 
-                {/* Filter Guru */}
-                <div
-                    className="bg-white rounded-2xl p-5"
-                    style={{ boxShadow: "0 8px 20px rgba(13,115,119,0.08)" }}
-                >
-                    <label
-                        className="block text-xs font-semibold mb-2"
-                        style={{ color: "#1F2937" }}
+                {/* Filter Guru (Admin only) */}
+                {isAdmin && (
+                    <div
+                        className="bg-white rounded-xl p-4"
+                        style={{
+                            boxShadow: "0 4px 12px rgba(13,115,119,0.06)",
+                        }}
                     >
-                        Pilih Guru
-                    </label>
-                    <select
-                        value={selectedGuru}
-                        onChange={handleFilterGuru}
-                        className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
-                        style={{ color: "#1F2937" }}
-                    >
-                        <option value="">Semua Guru</option>
-                        {guruList.map((guru) => (
-                            <option key={guru.id} value={guru.id}>
-                                {guru.name} - {guru.jabatan || "Tanpa Jabatan"}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                        <label
+                            className="block text-xs font-semibold mb-2"
+                            style={{ color: "#1F2937" }}
+                        >
+                            Pilih Guru
+                        </label>
+                        <select
+                            value={selectedGuru}
+                            onChange={handleFilterGuru}
+                            className="w-full px-4 py-2.5 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                            style={{ color: "#1F2937" }}
+                        >
+                            <option value="">Semua Guru</option>
+                            {guruList.map((guru) => (
+                                <option key={guru.id} value={guru.id}>
+                                    {guru.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 {/* Kalender */}
                 <div
-                    className="bg-white rounded-2xl p-5"
-                    style={{ boxShadow: "0 8px 20px rgba(13,115,119,0.08)" }}
+                    className="bg-white rounded-xl p-4"
+                    style={{ boxShadow: "0 4px 12px rgba(13,115,119,0.06)" }}
                 >
-                    {/* Navigasi Bulan */}
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-3">
                         <button
                             onClick={prevBulan}
-                            className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                            className="px-3 py-1.5 rounded-full text-xs font-semibold"
                             style={{ background: "#CCFBF1", color: "#0D7377" }}
                         >
                             ←
                         </button>
                         <h3
-                            className="text-lg font-bold"
+                            className="text-sm font-bold"
                             style={{ color: "#1F2937" }}
                         >
                             {namaBulan[bulan - 1]} {tahun}
                         </h3>
                         <button
                             onClick={nextBulan}
-                            className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                            className="px-3 py-1.5 rounded-full text-xs font-semibold"
                             style={{ background: "#CCFBF1", color: "#0D7377" }}
                         >
                             →
                         </button>
                     </div>
 
-                    {/* Legend */}
                     <div
-                        className="flex flex-wrap gap-4 mb-4 text-xs"
+                        className="flex flex-wrap gap-3 mb-3 text-[10px]"
                         style={{ color: "#9CA3AF" }}
                     >
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-1.5 rounded-full bg-green-500" />
+                        <div className="flex items-center gap-1">
+                            <div className="w-2 h-1 rounded-full bg-green-500" />{" "}
                             Datang
                         </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-1.5 rounded-full bg-blue-500" />
+                        <div className="flex items-center gap-1">
+                            <div className="w-2 h-1 rounded-full bg-blue-500" />{" "}
                             Pulang
                         </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-1.5 rounded-full bg-yellow-500" />
+                        <div className="flex items-center gap-1">
+                            <div className="w-2 h-1 rounded-full bg-yellow-500" />{" "}
                             Keterangan
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-1.5 rounded-full bg-gray-200" />
-                            Tidak ada
                         </div>
                     </div>
 
-                    {/* Grid Kalender */}
                     <div
                         className="grid grid-cols-7 gap-px"
                         style={{ background: "#CCFBF1" }}
@@ -251,7 +249,7 @@ function Rekap({ guruList, presensi, filter }) {
                         {hari.map((h) => (
                             <div
                                 key={h}
-                                className="text-center py-2 text-xs font-semibold text-white"
+                                className="text-center py-1.5 text-[10px] font-semibold text-white"
                                 style={{ background: "#14B8A6" }}
                             >
                                 {h}
@@ -268,12 +266,12 @@ function Rekap({ guruList, presensi, filter }) {
                         onClick={() => setSelectedDetail(null)}
                     >
                         <div
-                            className="bg-white rounded-2xl max-w-md w-full p-6"
+                            className="bg-white rounded-2xl max-w-md w-full p-5"
                             style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <h3
-                                className="font-bold text-lg mb-4"
+                                className="font-bold text-base mb-3"
                                 style={{ color: "#1F2937" }}
                             >
                                 {new Date(
@@ -285,7 +283,7 @@ function Rekap({ guruList, presensi, filter }) {
                                     year: "numeric",
                                 })}
                             </h3>
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                                 <div
                                     className="p-3 rounded-xl"
                                     style={{ background: "#F0FDFA" }}
@@ -364,7 +362,7 @@ function Rekap({ guruList, presensi, filter }) {
                             </div>
                             <button
                                 onClick={() => setSelectedDetail(null)}
-                                className="w-full py-3 rounded-full text-white font-semibold text-sm mt-4"
+                                className="w-full py-2.5 rounded-full text-white font-semibold text-sm mt-3"
                                 style={{
                                     background:
                                         "linear-gradient(135deg, #2DD4BF, #0D7377)",
