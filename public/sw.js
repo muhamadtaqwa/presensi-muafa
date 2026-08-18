@@ -1,4 +1,4 @@
-const CACHE_NAME = "presensi-muafa-v1";
+const CACHE_NAME = "presensi-muafa-v2";
 const urlsToCache = ["/", "/manifest.json"];
 
 // Install
@@ -27,12 +27,22 @@ self.addEventListener("activate", (event) => {
 
 // Fetch
 self.addEventListener("fetch", (event) => {
+    // Skip non-GET requests
+    if (event.request.method !== "GET") return;
+
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            if (response) {
+        fetch(event.request)
+            .then((response) => {
+                // Cache successful responses
+                const responseClone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, responseClone);
+                });
                 return response;
-            }
-            return fetch(event.request);
-        }),
+            })
+            .catch(() => {
+                // Offline fallback
+                return caches.match(event.request);
+            }),
     );
 });
