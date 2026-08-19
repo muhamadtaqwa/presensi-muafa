@@ -2,27 +2,48 @@ import React, { useState } from "react";
 import { useForm, usePage, Link } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "./Layouts/AppLayout";
-import { Eye, EyeOff, LogOut } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
-function Setting({ errors = {} }) {
+function Setting() {
     const { auth } = usePage().props;
     const user = auth?.user;
+    const isAdmin = user?.role === "admin";
 
-    const { data, setData, post, processing, reset } = useForm({
+    // Form ganti password (admin only)
+    const {
+        data: passwordData,
+        setData: setPasswordData,
+        post,
+        processing: passwordProcessing,
+        reset: resetPassword,
+    } = useForm({
         password_lama: "",
         password_baru: "",
         password_baru_confirmation: "",
     });
 
+    // Form edit data (guru only)
+    const {
+        data: profileData,
+        setData: setProfileData,
+        put,
+        processing: profileProcessing,
+    } = useForm({
+        name: user?.name || "",
+        username: user?.username || "",
+        nip: user?.nip || "",
+        jabatan: user?.jabatan || "",
+    });
+
     const [showLama, setShowLama] = useState(false);
     const [showBaru, setShowBaru] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleGantiPassword = (e) => {
         e.preventDefault();
         post("/setting/password", {
             onSuccess: () => {
                 toast.success("Password berhasil diganti");
-                reset();
+                resetPassword();
             },
             onError: (err) => {
                 if (err.password_lama) {
@@ -34,168 +55,329 @@ function Setting({ errors = {} }) {
         });
     };
 
+    const handleUpdateProfile = (e) => {
+        e.preventDefault();
+        put(`/setting/profile`, {
+            onSuccess: () => {
+                toast.success("Data berhasil diupdate");
+            },
+            onError: () => {
+                toast.error("Gagal update data");
+            },
+        });
+    };
+
     return (
         <>
             <div className="max-w-md mx-auto space-y-4">
-                {/* Info User */}
+                {/* Info User - Gradient Hijau, kanan kiri */}
                 <div
                     className="rounded-2xl px-5 py-4 text-white"
                     style={{
                         background:
                             "linear-gradient(135deg, #2DD4BF 0%, #14B8A6 50%, #0D7377 100%)",
-                        boxShadow: "0 4px 15px rgba(13,115,119,0.2)",
+                        boxShadow: "0 8px 25px rgba(13,115,119,0.3)",
                     }}
                 >
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-white/25 flex items-center justify-center text-white font-bold text-lg">
-                            {user?.name?.charAt(0) || "M"}
+                    <h3
+                        className="font-bold text-sm mb-3"
+                        style={{ color: "#FFFFFF" }}
+                    >
+                        Info User
+                    </h3>
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center text-xs">
+                            <span style={{ color: "rgba(255,255,255,0.7)" }}>
+                                Nama
+                            </span>
+                            <span
+                                className="font-semibold"
+                                style={{ color: "#FFFFFF" }}
+                            >
+                                {user?.name || "-"}
+                            </span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm truncate">
-                                {user?.name || "Pengguna"}
-                            </p>
-                            <p className="text-xs text-white/70 truncate">
-                                @{user?.username || "username"}
-                            </p>
-                            <p className="text-xs text-white/70 capitalize">
-                                {user?.role || "Role"}
-                            </p>
+                        <div className="flex justify-between items-center text-xs">
+                            <span style={{ color: "rgba(255,255,255,0.7)" }}>
+                                Username
+                            </span>
+                            <span
+                                className="font-semibold"
+                                style={{ color: "#FFFFFF" }}
+                            >
+                                {user?.username || "-"}
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                            <span style={{ color: "rgba(255,255,255,0.7)" }}>
+                                Role
+                            </span>
+                            <span
+                                className="font-semibold capitalize"
+                                style={{ color: "#FFFFFF" }}
+                            >
+                                {user?.role || "-"}
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                {/* Form Ganti Password */}
-                <div
-                    className="bg-white rounded-2xl p-6"
-                    style={{ boxShadow: "0 8px 20px rgba(13,115,119,0.08)" }}
-                >
-                    <h3
-                        className="font-bold text-lg mb-4"
-                        style={{ color: "#1F2937" }}
+                {/* Admin: Ganti Password */}
+                {isAdmin ? (
+                    <div
+                        className="bg-white rounded-2xl p-5"
+                        style={{
+                            boxShadow: "0 8px 20px rgba(13,115,119,0.08)",
+                        }}
                     >
-                        Ganti Password
-                    </h3>
+                        <h3
+                            className="font-bold text-sm mb-3"
+                            style={{ color: "#1F2937" }}
+                        >
+                            Ganti Password
+                        </h3>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Password Lama */}
-                        <div>
-                            <label
-                                className="block text-xs font-semibold mb-1.5"
-                                style={{ color: "#1F2937" }}
-                            >
-                                Password Lama
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showLama ? "text" : "password"}
-                                    value={data.password_lama}
-                                    onChange={(e) =>
-                                        setData("password_lama", e.target.value)
-                                    }
-                                    className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30 pr-12"
-                                    placeholder="Masukkan password lama"
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowLama(!showLama)}
-                                    className="absolute inset-y-0 right-0 flex items-center pr-4"
+                        <form
+                            onSubmit={handleGantiPassword}
+                            className="space-y-3"
+                        >
+                            <div className="flex items-center gap-3">
+                                <label
+                                    className="text-xs w-28 flex-shrink-0"
+                                    style={{ color: "#9CA3AF" }}
                                 >
-                                    {showLama ? (
-                                        <EyeOff
-                                            size={18}
-                                            style={{ color: "#9CA3AF" }}
-                                        />
-                                    ) : (
-                                        <Eye
-                                            size={18}
-                                            style={{ color: "#9CA3AF" }}
-                                        />
-                                    )}
-                                </button>
+                                    Password Lama
+                                </label>
+                                <div className="relative flex-1">
+                                    <input
+                                        type={showLama ? "text" : "password"}
+                                        value={passwordData.password_lama}
+                                        onChange={(e) =>
+                                            setPasswordData(
+                                                "password_lama",
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="w-full px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30 pr-9"
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowLama(!showLama)}
+                                        className="absolute inset-y-0 right-0 flex items-center pr-2.5"
+                                    >
+                                        {showLama ? (
+                                            <EyeOff
+                                                size={15}
+                                                style={{ color: "#9CA3AF" }}
+                                            />
+                                        ) : (
+                                            <Eye
+                                                size={15}
+                                                style={{ color: "#9CA3AF" }}
+                                            />
+                                        )}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Password Baru */}
-                        <div>
-                            <label
-                                className="block text-xs font-semibold mb-1.5"
-                                style={{ color: "#1F2937" }}
-                            >
-                                Password Baru
-                            </label>
-                            <div className="relative">
+                            <div className="flex items-center gap-3">
+                                <label
+                                    className="text-xs w-28 flex-shrink-0"
+                                    style={{ color: "#9CA3AF" }}
+                                >
+                                    Password Baru
+                                </label>
+                                <div className="relative flex-1">
+                                    <input
+                                        type={showBaru ? "text" : "password"}
+                                        value={passwordData.password_baru}
+                                        onChange={(e) =>
+                                            setPasswordData(
+                                                "password_baru",
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="w-full px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30 pr-9"
+                                        required
+                                        minLength={6}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowBaru(!showBaru)}
+                                        className="absolute inset-y-0 right-0 flex items-center pr-2.5"
+                                    >
+                                        {showBaru ? (
+                                            <EyeOff
+                                                size={15}
+                                                style={{ color: "#9CA3AF" }}
+                                            />
+                                        ) : (
+                                            <Eye
+                                                size={15}
+                                                style={{ color: "#9CA3AF" }}
+                                            />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <label
+                                    className="text-xs w-28 flex-shrink-0"
+                                    style={{ color: "#9CA3AF" }}
+                                >
+                                    Konfirmasi
+                                </label>
                                 <input
-                                    type={showBaru ? "text" : "password"}
-                                    value={data.password_baru}
-                                    onChange={(e) =>
-                                        setData("password_baru", e.target.value)
+                                    type="password"
+                                    value={
+                                        passwordData.password_baru_confirmation
                                     }
-                                    className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30 pr-12"
-                                    placeholder="Masukkan password baru"
+                                    onChange={(e) =>
+                                        setPasswordData(
+                                            "password_baru_confirmation",
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                     required
                                     minLength={6}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowBaru(!showBaru)}
-                                    className="absolute inset-y-0 right-0 flex items-center pr-4"
-                                >
-                                    {showBaru ? (
-                                        <EyeOff
-                                            size={18}
-                                            style={{ color: "#9CA3AF" }}
-                                        />
-                                    ) : (
-                                        <Eye
-                                            size={18}
-                                            style={{ color: "#9CA3AF" }}
-                                        />
-                                    )}
-                                </button>
                             </div>
-                        </div>
 
-                        {/* Konfirmasi Password Baru */}
-                        <div>
-                            <label
-                                className="block text-xs font-semibold mb-1.5"
-                                style={{ color: "#1F2937" }}
+                            <button
+                                type="submit"
+                                disabled={passwordProcessing}
+                                className="w-full py-2.5 rounded-full text-white font-semibold text-sm disabled:opacity-50"
+                                style={{
+                                    background:
+                                        "linear-gradient(135deg, #2DD4BF, #0D7377)",
+                                    boxShadow:
+                                        "0 4px 12px rgba(13,115,119,0.3)",
+                                }}
                             >
-                                Konfirmasi Password Baru
-                            </label>
-                            <input
-                                type="password"
-                                value={data.password_baru_confirmation}
-                                onChange={(e) =>
-                                    setData(
-                                        "password_baru_confirmation",
-                                        e.target.value,
-                                    )
-                                }
-                                className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
-                                placeholder="Ulangi password baru"
-                                required
-                                minLength={6}
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="w-full py-3.5 rounded-full text-white font-semibold text-sm transition-all disabled:opacity-50"
-                            style={{
-                                background:
-                                    "linear-gradient(135deg, #2DD4BF, #0D7377)",
-                                boxShadow: "0 4px 12px rgba(13,115,119,0.3)",
-                            }}
+                                {passwordProcessing
+                                    ? "Menyimpan..."
+                                    : "Ganti Password"}
+                            </button>
+                        </form>
+                    </div>
+                ) : (
+                    /* Guru: Edit Data Diri */
+                    <div
+                        className="bg-white rounded-2xl p-5"
+                        style={{
+                            boxShadow: "0 8px 20px rgba(13,115,119,0.08)",
+                        }}
+                    >
+                        <h3
+                            className="font-bold text-sm mb-3"
+                            style={{ color: "#1F2937" }}
                         >
-                            {processing ? "Menyimpan..." : "Ganti Password"}
-                        </button>
-                    </form>
-                </div>
+                            Edit Data
+                        </h3>
 
-                {/* Tombol Keluar (di bawah) */}
+                        <form
+                            onSubmit={handleUpdateProfile}
+                            className="space-y-3"
+                        >
+                            <div className="flex items-center gap-3">
+                                <label
+                                    className="text-xs w-28 flex-shrink-0"
+                                    style={{ color: "#9CA3AF" }}
+                                >
+                                    Nama
+                                </label>
+                                <input
+                                    type="text"
+                                    value={profileData.name}
+                                    onChange={(e) =>
+                                        setProfileData("name", e.target.value)
+                                    }
+                                    className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                    required
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <label
+                                    className="text-xs w-28 flex-shrink-0"
+                                    style={{ color: "#9CA3AF" }}
+                                >
+                                    Username
+                                </label>
+                                <input
+                                    type="text"
+                                    value={profileData.username}
+                                    onChange={(e) =>
+                                        setProfileData(
+                                            "username",
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                    required
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <label
+                                    className="text-xs w-28 flex-shrink-0"
+                                    style={{ color: "#9CA3AF" }}
+                                >
+                                    NIP
+                                </label>
+                                <input
+                                    type="text"
+                                    value={profileData.nip}
+                                    onChange={(e) =>
+                                        setProfileData("nip", e.target.value)
+                                    }
+                                    className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <label
+                                    className="text-xs w-28 flex-shrink-0"
+                                    style={{ color: "#9CA3AF" }}
+                                >
+                                    Jabatan
+                                </label>
+                                <input
+                                    type="text"
+                                    value={profileData.jabatan}
+                                    onChange={(e) =>
+                                        setProfileData(
+                                            "jabatan",
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={profileProcessing}
+                                className="w-full py-2.5 rounded-full text-white font-semibold text-sm disabled:opacity-50"
+                                style={{
+                                    background:
+                                        "linear-gradient(135deg, #2DD4BF, #0D7377)",
+                                    boxShadow:
+                                        "0 4px 12px rgba(13,115,119,0.3)",
+                                }}
+                            >
+                                {profileProcessing
+                                    ? "Menyimpan..."
+                                    : "Simpan Perubahan"}
+                            </button>
+                        </form>
+                    </div>
+                )}
+
+                {/* Logout */}
                 <Link
                     href="/logout"
                     method="post"

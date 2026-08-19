@@ -35,4 +35,20 @@ class SettingController extends Controller
 
         return back()->with('success', 'Password berhasil diganti.');
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:50|unique:users,username,' . $user->id,
+            'nip' => 'nullable|string|max:50|unique:users,nip,' . $user->id,
+            'jabatan' => 'nullable|string|max:100',
+        ]);
+
+        $user->update($validated);
+
+        return back()->with('success', 'Data berhasil diupdate.');
+    }
 }

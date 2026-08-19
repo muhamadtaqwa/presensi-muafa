@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuruController;
+use App\Http\Controllers\IzinController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\RekapController;
 use App\Http\Controllers\SettingController;
@@ -29,6 +30,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/presensi', [PresensiController::class, 'store'])->name('presensi.store');
     Route::delete('/presensi/{id}', [PresensiController::class, 'destroy'])->name('presensi.destroy');
 
+    // Izin
+    Route::get('/izin', [IzinController::class, 'index'])->name('izin');
+    Route::post('/izin', [IzinController::class, 'store'])->name('izin.store');
+    Route::delete('/izin/{id}', [IzinController::class, 'destroy'])->name('izin.destroy');
+
     // Rekap Presensi
     Route::get('/rekap', [RekapController::class, 'index'])->name('rekap');
     Route::get('/rekap/export-excel', [RekapController::class, 'exportExcel'])->name('rekap.export-excel');
@@ -37,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
     // Setting (ganti password)
     Route::get('/setting', [SettingController::class, 'index'])->name('setting');
     Route::post('/setting/password', [SettingController::class, 'updatePassword'])->name('setting.password');
+    Route::post('/setting/profile', [SettingController::class, 'updateProfile'])->name('setting.profile');
 
     // Data Guru (admin only)
     Route::middleware(['role:admin'])->group(function () {

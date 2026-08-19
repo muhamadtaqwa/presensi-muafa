@@ -23,6 +23,7 @@ class Presensi extends Model
         'lat_pulang',
         'long_pulang',
         'keterangan',
+        'jenis_izin',
         'status',
     ];
 

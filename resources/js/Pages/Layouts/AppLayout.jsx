@@ -6,8 +6,8 @@ import {
     Calendar,
     Users,
     Settings,
+    FileText,
 } from "lucide-react";
-import LoadingSkeleton from "../../Components/LoadingSkeleton";
 
 export default function AppLayout({ children, header }) {
     const { auth } = usePage().props;
@@ -56,6 +56,12 @@ export default function AppLayout({ children, header }) {
                       key: "dashboard",
                   },
                   {
+                      name: "Izin",
+                      href: "/izin",
+                      icon: FileText,
+                      key: "izin",
+                  },
+                  {
                       name: "Presensi",
                       href: "/presensi",
                       icon: Camera,
@@ -67,6 +73,12 @@ export default function AppLayout({ children, header }) {
                       href: "/rekap",
                       icon: Calendar,
                       key: "rekap",
+                  },
+                  {
+                      name: "Setting",
+                      href: "/setting",
+                      icon: Settings,
+                      key: "setting",
                   },
               ];
 
@@ -80,9 +92,7 @@ export default function AppLayout({ children, header }) {
             }}
         >
             {/* Main Content */}
-            <main className="px-4 py-5 max-w-4xl mx-auto">
-                {children || <LoadingSkeleton />}
-            </main>
+            <main className="px-4 py-5 max-w-4xl mx-auto">{children}</main>
 
             {/* Bottom Navigation */}
             <nav
@@ -94,12 +104,13 @@ export default function AppLayout({ children, header }) {
                     paddingBottom: "env(safe-area-inset-bottom)",
                 }}
             >
-                <div className="flex items-end justify-around px-4 pt-2 pb-3 max-w-4xl mx-auto">
+                <div className="flex items-end justify-around px-2 pt-2 pb-3 max-w-4xl mx-auto">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const active = window.location.pathname === item.href;
 
                         if (item.center) {
+                            // Tombol Presensi Tengah (Mencolok)
                             return (
                                 <Link
                                     key={item.key}
@@ -107,7 +118,7 @@ export default function AppLayout({ children, header }) {
                                     className="flex flex-col items-center gap-1 relative -mt-6"
                                 >
                                     <div
-                                        className="w-16 h-16 rounded-full flex items-center justify-center text-white transition-all duration-300"
+                                        className="w-14 h-14 rounded-full flex items-center justify-center text-white transition-all duration-300"
                                         style={{
                                             background:
                                                 "linear-gradient(135deg, #2DD4BF 0%, #14B8A6 50%, #0D7377 100%)",
@@ -116,7 +127,7 @@ export default function AppLayout({ children, header }) {
                                             border: "4px solid #FFFFFF",
                                         }}
                                     >
-                                        <Icon size={26} />
+                                        <Icon size={24} />
                                     </div>
                                 </Link>
                             );
@@ -126,16 +137,16 @@ export default function AppLayout({ children, header }) {
                             <Link
                                 key={item.key}
                                 href={item.href}
-                                className="flex flex-col items-center gap-1 px-3 py-1"
+                                className="flex flex-col items-center gap-1 px-2 py-1"
                             >
                                 <Icon
-                                    size={22}
+                                    size={20}
                                     style={{
                                         color: active ? "#0D7377" : "#D1D5DB",
                                     }}
                                 />
                                 <span
-                                    className="text-xs font-semibold"
+                                    className="text-[10px] font-semibold"
                                     style={{
                                         color: active ? "#0D7377" : "#9CA3AF",
                                     }}
