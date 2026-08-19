@@ -141,14 +141,14 @@ function Setting() {
                             onSubmit={handleGantiPassword}
                             className="space-y-3"
                         >
-                            <div className="flex items-center gap-3">
+                            <div>
                                 <label
-                                    className="text-xs w-28 flex-shrink-0"
+                                    className="text-xs block mb-1"
                                     style={{ color: "#9CA3AF" }}
                                 >
                                     Password Lama
                                 </label>
-                                <div className="relative flex-1">
+                                <div className="relative">
                                     <input
                                         type={showLama ? "text" : "password"}
                                         value={passwordData.password_lama}
@@ -181,14 +181,14 @@ function Setting() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div>
                                 <label
-                                    className="text-xs w-28 flex-shrink-0"
+                                    className="text-xs block mb-1"
                                     style={{ color: "#9CA3AF" }}
                                 >
                                     Password Baru
                                 </label>
-                                <div className="relative flex-1">
+                                <div className="relative">
                                     <input
                                         type={showBaru ? "text" : "password"}
                                         value={passwordData.password_baru}
@@ -222,9 +222,9 @@ function Setting() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div>
                                 <label
-                                    className="text-xs w-28 flex-shrink-0"
+                                    className="text-xs block mb-1"
                                     style={{ color: "#9CA3AF" }}
                                 >
                                     Konfirmasi
@@ -240,7 +240,7 @@ function Setting() {
                                             e.target.value,
                                         )
                                     }
-                                    className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                    className="w-full px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                     required
                                     minLength={6}
                                 />
@@ -282,9 +282,9 @@ function Setting() {
                             onSubmit={handleUpdateProfile}
                             className="space-y-3"
                         >
-                            <div className="flex items-center gap-3">
+                            <div>
                                 <label
-                                    className="text-xs w-28 flex-shrink-0"
+                                    className="text-xs block mb-1"
                                     style={{ color: "#9CA3AF" }}
                                 >
                                     Nama
@@ -295,14 +295,14 @@ function Setting() {
                                     onChange={(e) =>
                                         setProfileData("name", e.target.value)
                                     }
-                                    className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                    className="w-full px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                     required
                                 />
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div>
                                 <label
-                                    className="text-xs w-28 flex-shrink-0"
+                                    className="text-xs block mb-1"
                                     style={{ color: "#9CA3AF" }}
                                 >
                                     Username
@@ -316,14 +316,14 @@ function Setting() {
                                             e.target.value,
                                         )
                                     }
-                                    className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                    className="w-full px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                     required
                                 />
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div>
                                 <label
-                                    className="text-xs w-28 flex-shrink-0"
+                                    className="text-xs block mb-1"
                                     style={{ color: "#9CA3AF" }}
                                 >
                                     NIP
@@ -334,13 +334,13 @@ function Setting() {
                                     onChange={(e) =>
                                         setProfileData("nip", e.target.value)
                                     }
-                                    className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                    className="w-full px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                 />
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div>
                                 <label
-                                    className="text-xs w-28 flex-shrink-0"
+                                    className="text-xs block mb-1"
                                     style={{ color: "#9CA3AF" }}
                                 >
                                     Jabatan
@@ -354,7 +354,7 @@ function Setting() {
                                             e.target.value,
                                         )
                                     }
-                                    className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                    className="w-full px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                 />
                             </div>
 
