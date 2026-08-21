@@ -3,7 +3,7 @@ import { router } from "@inertiajs/react";
 import AppLayout from "./Layouts/AppLayout";
 import toast from "react-hot-toast";
 
-function Presensi({ presensi, today, riwayat }) {
+function Presensi({ presensi, izinHariIni, today, riwayat }) {
     const [jam, setJam] = useState(new Date());
     const [lokasi, setLokasi] = useState(null);
     const [loadingLokasi, setLoadingLokasi] = useState(true);
@@ -34,19 +34,14 @@ function Presensi({ presensi, today, riwayat }) {
                         long: position.coords.longitude,
                     });
                     setLoadingLokasi(false);
-                    toast.success("Lokasi berhasil didapat");
                 },
                 () => {
                     setLoadingLokasi(false);
-                    toast.error(
-                        "Gagal mendapatkan lokasi, klik Ambil Lokasi untuk coba lagi",
-                    );
                 },
                 { enableHighAccuracy: true, timeout: 10000 },
             );
         } else {
             setLoadingLokasi(false);
-            toast.error("Browser tidak mendukung GPS");
         }
     }, []);
 
@@ -250,17 +245,17 @@ function Presensi({ presensi, today, riwayat }) {
             return;
         }
 
-        if (!confirm("Yakin ingin batalkan absen hari ini?")) return;
+        if (!confirm("Yakin ingin batalkan presensi hari ini?")) return;
 
         setBatalkanProcessing(true);
 
         router.delete(`/presensi/${presensi.id}`, {
             onSuccess: () => {
-                toast.success("Absen berhasil dibatalkan");
+                toast.success("Presensi berhasil dibatalkan");
                 setTimeout(() => window.location.reload(), 1000);
             },
             onError: () => {
-                toast.error("Gagal membatalkan absen");
+                toast.error("Gagal membatalkan presensi");
                 setBatalkanProcessing(false);
             },
         });
@@ -273,8 +268,8 @@ function Presensi({ presensi, today, riwayat }) {
 
     return (
         <>
-            <div className="max-w-2xl mx-auto space-y-4">
-                {/* Info Jam & Lokasi */}
+            <div className="space-y-4">
+                {/* Info Jam & Lokasi - Full Width */}
                 <div
                     className="rounded-2xl px-4 py-3 text-white"
                     style={{
@@ -329,8 +324,38 @@ function Presensi({ presensi, today, riwayat }) {
                     </p>
                 </div>
 
-                {/* Kamera Preview */}
-                {showKamera && (
+                {/* Izin Hari Ini */}
+                {izinHariIni && (
+                    <div
+                        className="rounded-2xl p-4 text-center"
+                        style={{
+                            background: "#FEF3C7",
+                            border: "1px solid #F59E0B",
+                        }}
+                    >
+                        <p
+                            className="text-sm font-bold"
+                            style={{ color: "#D97706" }}
+                        >
+                            Anda sudah {izinHariIni.jenis_izin} hari ini
+                        </p>
+                        <p
+                            className="text-xs mt-1"
+                            style={{ color: "#D97706" }}
+                        >
+                            {izinHariIni.hari}, {izinHariIni.tanggal_format}
+                        </p>
+                        <p
+                            className="text-xs mt-1"
+                            style={{ color: "#92400E" }}
+                        >
+                            {izinHariIni.keterangan}
+                        </p>
+                    </div>
+                )}
+
+                {/* Kamera Preview - Full Width */}
+                {showKamera && !izinHariIni && (
                     <div
                         className="bg-white rounded-2xl p-4"
                         style={{
@@ -362,7 +387,7 @@ function Presensi({ presensi, today, riwayat }) {
                             className="w-full rounded-xl"
                             autoPlay
                             playsInline
-                            style={{ maxHeight: "350px", background: "#000" }}
+                            style={{ maxHeight: "400px", background: "#000" }}
                         />
                         <div className="flex gap-2 mt-3">
                             <button
@@ -389,8 +414,8 @@ function Presensi({ presensi, today, riwayat }) {
                     </div>
                 )}
 
-                {/* Preview Foto */}
-                {previewFoto && !showKamera && (
+                {/* Preview Foto - Full Width */}
+                {previewFoto && !showKamera && !izinHariIni && (
                     <div
                         className="bg-white rounded-2xl p-4"
                         style={{
@@ -464,10 +489,10 @@ function Presensi({ presensi, today, riwayat }) {
                     </div>
                 )}
 
-                {/* Card Absen */}
-                {!showKamera && !previewFoto && (
-                    <div className="space-y-3">
-                        {/* Absen Datang */}
+                {/* Card Absen - 2 Grid Desktop */}
+                {!showKamera && !previewFoto && !izinHariIni && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                        {/* Presensi Datang */}
                         <div
                             className="bg-white rounded-2xl p-4"
                             style={{
@@ -553,7 +578,7 @@ function Presensi({ presensi, today, riwayat }) {
                             )}
                         </div>
 
-                        {/* Absen Pulang */}
+                        {/* Presensi Pulang */}
                         <div
                             className="bg-white rounded-2xl p-4"
                             style={{
@@ -638,24 +663,28 @@ function Presensi({ presensi, today, riwayat }) {
                                 </button>
                             )}
                         </div>
-
-                        {/* Tombol Batalkan */}
-                        {presensi && (fotoDatang || fotoPulang) && (
-                            <button
-                                onClick={batalkanAbsen}
-                                disabled={batalkanProcessing}
-                                className="w-full py-2.5 rounded-full text-xs font-semibold text-red-600 disabled:opacity-50"
-                                style={{ background: "#FEE2E2" }}
-                            >
-                                {batalkanProcessing
-                                    ? "Membatalkan..."
-                                    : "Batalkan Semua Presensi Hari Ini"}
-                            </button>
-                        )}
                     </div>
                 )}
 
-                {/* Riwayat Presensi */}
+                {/* Tombol Batalkan - Full Width */}
+                {!showKamera &&
+                    !previewFoto &&
+                    !izinHariIni &&
+                    presensi &&
+                    (fotoDatang || fotoPulang) && (
+                        <button
+                            onClick={batalkanAbsen}
+                            disabled={batalkanProcessing}
+                            className="w-full py-2.5 rounded-full text-xs font-semibold text-red-600 disabled:opacity-50"
+                            style={{ background: "#FEE2E2" }}
+                        >
+                            {batalkanProcessing
+                                ? "Membatalkan..."
+                                : "Batalkan Semua Presensi Hari Ini"}
+                        </button>
+                    )}
+
+                {/* Riwayat Presensi - Full Width */}
                 <div
                     className="bg-white rounded-2xl p-4"
                     style={{ boxShadow: "0 8px 20px rgba(13,115,119,0.08)" }}

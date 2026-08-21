@@ -16,8 +16,11 @@ class PresensiController extends Controller
     public function index()
     {
         $today = now()->format('Y-m-d');
+
+        // Cek presensi hari ini
         $presensi = Presensi::where('user_id', Auth::id())
             ->where('tanggal', $today)
+            ->whereNull('jenis_izin')
             ->first();
 
         if ($presensi) {
@@ -27,7 +30,19 @@ class PresensiController extends Controller
             $presensi->jam_pulang = $presensi->jam_pulang?->format('H:i:s');
         }
 
+        // Cek izin hari ini
+        $izinHariIni = Presensi::where('user_id', Auth::id())
+            ->where('tanggal', $today)
+            ->whereNotNull('jenis_izin')
+            ->first();
+
+        if ($izinHariIni) {
+            $izinHariIni->tanggal_format = $izinHariIni->tanggal->locale('id')->isoFormat('D MMMM YYYY');
+            $izinHariIni->hari = $izinHariIni->tanggal->locale('id')->isoFormat('dddd');
+        }
+
         $riwayat = Presensi::where('user_id', Auth::id())
+            ->whereNull('jenis_izin')
             ->orderBy('tanggal', 'desc')
             ->limit(5)
             ->get()
@@ -43,6 +58,7 @@ class PresensiController extends Controller
 
         return Inertia::render('Presensi', [
             'presensi' => $presensi,
+            'izinHariIni' => $izinHariIni,
             'today' => $today,
             'riwayat' => $riwayat,
         ]);
@@ -69,8 +85,19 @@ class PresensiController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
+        // Cek apakah sudah izin di tanggal tersebut
+        $izin = Presensi::where('user_id', Auth::id())
+            ->where('tanggal', $request->tanggal)
+            ->whereNotNull('jenis_izin')
+            ->first();
+
+        if ($izin) {
+            return back()->withErrors(['message' => 'Anda sudah izin hari ini, tidak bisa absen.']);
+        }
+
         $data = $request->all();
         $data['user_id'] = Auth::id();
+        $data['jenis_izin'] = null;
 
         // Upload foto datang
         if ($request->hasFile('foto_datang')) {
@@ -129,6 +156,7 @@ class PresensiController extends Controller
         $tahun = request('tahun', now()->format('Y'));
 
         $presensi = Presensi::where('user_id', Auth::id())
+            ->whereNull('jenis_izin')
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->get();

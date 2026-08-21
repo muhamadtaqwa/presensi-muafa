@@ -2,15 +2,25 @@ import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import AppLayout from "./Layouts/AppLayout";
 import { LayoutDashboard, CheckCircle2, Clock } from "lucide-react";
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
+} from "recharts";
 
 function Dashboard({
     isAdmin,
     stats,
     belumAbsenList,
     kehadiranMingguan,
+    aktivitasTerbaru,
     presensiBulan,
     statistikBulan,
     presensiToday,
+    izinHariIni,
     bulan,
     tahun,
     riwayatPresensi,
@@ -95,7 +105,7 @@ function Dashboard({
                                 </div>
                             </div>
                             <p
-                                className="text-sm font-bold mt-1"
+                                className="text-xs mt-2"
                                 style={{ color: "rgba(255,255,255,0.7)" }}
                             >
                                 {today}
@@ -103,8 +113,8 @@ function Dashboard({
                         </div>
                     </div>
 
-                    {/* Statistik */}
-                    <div className="grid grid-cols-2 gap-3">
+                    {/* Statistik Presensi - 4 Kolom Desktop */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                         <div
                             className="bg-white rounded-xl p-4"
                             style={{
@@ -183,122 +193,205 @@ function Dashboard({
                         </div>
                     </div>
 
-                    {/* Grafik Donut */}
-                    <div
-                        className="bg-white rounded-xl p-4"
-                        style={{
-                            boxShadow: "0 4px 12px rgba(13,115,119,0.06)",
-                        }}
-                    >
-                        <h3
-                            className="font-bold text-sm mb-3"
-                            style={{ color: "#1F2937" }}
+                    {/* Statistik Baru - 4 Kolom Desktop */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div
+                            className="bg-white rounded-xl p-4"
+                            style={{
+                                boxShadow: "0 4px 12px rgba(13,115,119,0.06)",
+                            }}
                         >
-                            Kehadiran Hari Ini
-                        </h3>
-                        <div className="flex flex-col items-center">
-                            <div
-                                className="w-28 h-28 rounded-full relative"
-                                style={{
-                                    background: `conic-gradient(#22C55E 0% ${stats.persentaseHadir}%, #EF4444 ${stats.persentaseHadir}% 100%)`,
-                                }}
+                            <p
+                                className="text-xs font-medium"
+                                style={{ color: "#9CA3AF" }}
                             >
-                                <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center">
-                                    <span
-                                        className="text-lg font-bold"
-                                        style={{ color: "#0D7377" }}
-                                    >
-                                        {stats.persentaseHadir}%
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="flex gap-4 mt-3">
-                                <div className="flex items-center gap-1.5">
-                                    <span
-                                        className="w-3 h-3 rounded-full"
-                                        style={{ background: "#22C55E" }}
-                                    />
-                                    <span
-                                        className="text-xs"
-                                        style={{ color: "#9CA3AF" }}
-                                    >
-                                        Hadir
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                    <span
-                                        className="w-3 h-3 rounded-full"
-                                        style={{ background: "#EF4444" }}
-                                    />
-                                    <span
-                                        className="text-xs"
-                                        style={{ color: "#9CA3AF" }}
-                                    >
-                                        Belum
-                                    </span>
-                                </div>
-                            </div>
+                                User Aktif
+                            </p>
+                            <p
+                                className="text-lg font-bold mt-1"
+                                style={{ color: "#0D7377" }}
+                            >
+                                {stats.userAktif}
+                            </p>
+                        </div>
+                        <div
+                            className="bg-white rounded-xl p-4"
+                            style={{
+                                boxShadow: "0 4px 12px rgba(13,115,119,0.06)",
+                            }}
+                        >
+                            <p
+                                className="text-xs font-medium"
+                                style={{ color: "#9CA3AF" }}
+                            >
+                                Total User
+                            </p>
+                            <p
+                                className="text-lg font-bold mt-1"
+                                style={{ color: "#0D7377" }}
+                            >
+                                {stats.totalUser}
+                            </p>
+                        </div>
+                        <div
+                            className="bg-white rounded-xl p-4"
+                            style={{
+                                boxShadow: "0 4px 12px rgba(13,115,119,0.06)",
+                            }}
+                        >
+                            <p
+                                className="text-xs font-medium"
+                                style={{ color: "#9CA3AF" }}
+                            >
+                                Kunjungan Hari Ini
+                            </p>
+                            <p
+                                className="text-lg font-bold mt-1"
+                                style={{ color: "#0D7377" }}
+                            >
+                                {stats.kunjunganHariIni}
+                            </p>
+                        </div>
+                        <div
+                            className="bg-white rounded-xl p-4"
+                            style={{
+                                boxShadow: "0 4px 12px rgba(13,115,119,0.06)",
+                            }}
+                        >
+                            <p
+                                className="text-xs font-medium"
+                                style={{ color: "#9CA3AF" }}
+                            >
+                                Total Kunjungan
+                            </p>
+                            <p
+                                className="text-lg font-bold mt-1"
+                                style={{ color: "#0D7377" }}
+                            >
+                                {stats.totalKunjungan}
+                            </p>
                         </div>
                     </div>
 
-                    {/* Guru Belum Absen */}
-                    <div
-                        className="bg-white rounded-xl p-4"
-                        style={{
-                            boxShadow: "0 4px 12px rgba(13,115,119,0.06)",
-                        }}
-                    >
-                        <h3
-                            className="font-bold text-sm mb-3"
-                            style={{ color: "#1F2937" }}
+                    {/* Kehadiran & Guru Belum Absen - 2 Grid Desktop */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                        {/* Grafik Donut */}
+                        <div
+                            className="bg-white rounded-xl p-4"
+                            style={{
+                                boxShadow: "0 4px 12px rgba(13,115,119,0.06)",
+                            }}
                         >
-                            Guru Belum Absen
-                        </h3>
-                        {belumAbsenList.length === 0 ? (
-                            <p
-                                className="text-xs text-center py-4"
-                                style={{ color: "#9CA3AF" }}
+                            <h3
+                                className="font-bold text-sm mb-3"
+                                style={{ color: "#1F2937" }}
                             >
-                                Semua guru sudah absen ✓
-                            </p>
-                        ) : (
-                            <div className="space-y-2">
-                                {belumAbsenList.map((guru) => (
-                                    <div
-                                        key={guru.id}
-                                        className="flex items-center justify-between py-2 border-b last:border-0"
-                                        style={{ borderColor: "#F0FDFA" }}
-                                    >
-                                        <div>
-                                            <p
-                                                className="text-sm font-medium"
-                                                style={{ color: "#1F2937" }}
-                                            >
-                                                {guru.name}
-                                            </p>
-                                            <p
-                                                className="text-xs"
-                                                style={{ color: "#9CA3AF" }}
-                                            >
-                                                {guru.jabatan || "-"}
-                                            </p>
-                                        </div>
+                                Kehadiran Hari Ini
+                            </h3>
+                            <div className="flex flex-col items-center">
+                                <div
+                                    className="w-28 h-28 rounded-full relative"
+                                    style={{
+                                        background: `conic-gradient(#22C55E 0% ${stats.persentaseHadir}%, #EF4444 ${stats.persentaseHadir}% 100%)`,
+                                    }}
+                                >
+                                    <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center">
                                         <span
-                                            className="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold"
-                                            style={{
-                                                background: "#FEE2E2",
-                                                color: "#DC2626",
-                                            }}
+                                            className="text-lg font-bold"
+                                            style={{ color: "#0D7377" }}
+                                        >
+                                            {stats.persentaseHadir}%
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4 mt-3">
+                                    <div className="flex items-center gap-1.5">
+                                        <span
+                                            className="w-3 h-3 rounded-full"
+                                            style={{ background: "#22C55E" }}
+                                        />
+                                        <span
+                                            className="text-xs"
+                                            style={{ color: "#9CA3AF" }}
+                                        >
+                                            Hadir
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span
+                                            className="w-3 h-3 rounded-full"
+                                            style={{ background: "#EF4444" }}
+                                        />
+                                        <span
+                                            className="text-xs"
+                                            style={{ color: "#9CA3AF" }}
                                         >
                                             Belum
                                         </span>
                                     </div>
-                                ))}
+                                </div>
                             </div>
-                        )}
+                        </div>
+
+                        {/* Guru Belum Absen */}
+                        <div
+                            className="bg-white rounded-xl p-4"
+                            style={{
+                                boxShadow: "0 4px 12px rgba(13,115,119,0.06)",
+                            }}
+                        >
+                            <h3
+                                className="font-bold text-sm mb-3"
+                                style={{ color: "#1F2937" }}
+                            >
+                                Guru Belum Absen
+                            </h3>
+                            {belumAbsenList.length === 0 ? (
+                                <p
+                                    className="text-xs text-center py-4"
+                                    style={{ color: "#9CA3AF" }}
+                                >
+                                    Semua guru sudah absen ✓
+                                </p>
+                            ) : (
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    {belumAbsenList.map((guru) => (
+                                        <div
+                                            key={guru.id}
+                                            className="flex items-center justify-between py-2 border-b last:border-0"
+                                            style={{ borderColor: "#F0FDFA" }}
+                                        >
+                                            <div>
+                                                <p
+                                                    className="text-sm font-medium"
+                                                    style={{ color: "#1F2937" }}
+                                                >
+                                                    {guru.name}
+                                                </p>
+                                                <p
+                                                    className="text-xs"
+                                                    style={{ color: "#9CA3AF" }}
+                                                >
+                                                    {guru.jabatan || "-"}
+                                                </p>
+                                            </div>
+                                            <span
+                                                className="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold"
+                                                style={{
+                                                    background: "#FEE2E2",
+                                                    color: "#DC2626",
+                                                }}
+                                            >
+                                                Belum
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Kehadiran Mingguan */}
+                    {/* Kehadiran Mingguan - Line Chart */}
                     <div
                         className="bg-white rounded-xl p-4"
                         style={{
@@ -311,30 +404,95 @@ function Dashboard({
                         >
                             Kehadiran 7 Hari Terakhir
                         </h3>
-                        <div className="flex items-end justify-between gap-2">
-                            {kehadiranMingguan.map((item) => (
-                                <div
-                                    key={item.tanggal}
-                                    className="flex-1 text-center"
-                                >
+                        <ResponsiveContainer width="100%" height={200}>
+                            <LineChart data={kehadiranMingguan}>
+                                <XAxis
+                                    dataKey="tanggal"
+                                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                                    axisLine={false}
+                                    tickLine={false}
+                                />
+                                <YAxis
+                                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                                    axisLine={false}
+                                    tickLine={false}
+                                    width={20}
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        fontSize: 12,
+                                        borderRadius: 8,
+                                        border: "none",
+                                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                                    }}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="jumlah"
+                                    stroke="#0D7377"
+                                    strokeWidth={2.5}
+                                    dot={{ fill: "#0D7377", r: 4 }}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+
+                    {/* Aktivitas Terbaru */}
+                    <div
+                        className="bg-white rounded-xl p-4"
+                        style={{
+                            boxShadow: "0 4px 12px rgba(13,115,119,0.06)",
+                        }}
+                    >
+                        <h3
+                            className="font-bold text-sm mb-3"
+                            style={{ color: "#1F2937" }}
+                        >
+                            Aktivitas Terbaru
+                        </h3>
+                        {aktivitasTerbaru?.length === 0 || !aktivitasTerbaru ? (
+                            <p
+                                className="text-xs text-center py-4"
+                                style={{ color: "#9CA3AF" }}
+                            >
+                                Belum ada aktivitas
+                            </p>
+                        ) : (
+                            <div className="space-y-2">
+                                {aktivitasTerbaru.map((item, index) => (
                                     <div
-                                        className="mx-auto rounded-t-lg"
-                                        style={{
-                                            height: `${Math.max(item.jumlah * 10, 8)}px`,
-                                            background:
-                                                "linear-gradient(180deg, #2DD4BF, #0D7377)",
-                                            maxWidth: "30px",
-                                        }}
-                                    />
-                                    <p
-                                        className="text-[10px] mt-1"
-                                        style={{ color: "#9CA3AF" }}
+                                        key={index}
+                                        className="flex items-center gap-3 py-2 border-b last:border-0"
+                                        style={{ borderColor: "#F0FDFA" }}
                                     >
-                                        {item.tanggal}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
+                                        <div
+                                            className="w-2 h-2 rounded-full flex-shrink-0"
+                                            style={{ background: item.warna }}
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <p
+                                                className="text-xs font-medium truncate"
+                                                style={{ color: "#1F2937" }}
+                                            >
+                                                {item.nama}
+                                            </p>
+                                            <p
+                                                className="text-[10px]"
+                                                style={{ color: "#9CA3AF" }}
+                                            >
+                                                {item.aktivitas}
+                                            </p>
+                                        </div>
+                                        <span
+                                            className="text-xs font-semibold flex-shrink-0"
+                                            style={{ color: "#9CA3AF" }}
+                                        >
+                                            {item.waktu}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </>
@@ -347,6 +505,7 @@ function Dashboard({
             presensiBulan={presensiBulan}
             statistikBulan={statistikBulan}
             presensiToday={presensiToday}
+            izinHariIni={izinHariIni}
             bulan={bulan}
             tahun={tahun}
             namaBulan={namaBulan}
@@ -362,6 +521,7 @@ function GuruDashboardView({
     presensiBulan,
     statistikBulan,
     presensiToday,
+    izinHariIni,
     bulan,
     tahun,
     namaBulan,
@@ -480,7 +640,7 @@ function GuruDashboardView({
                                     })}
                                 </p>
                                 <p
-                                    className="text-sm font-bold mt-1"
+                                    className="text-xs mt-1"
                                     style={{ color: "rgba(255,255,255,0.7)" }}
                                 >
                                     {new Date().toLocaleDateString("id-ID", {
@@ -503,9 +663,11 @@ function GuruDashboardView({
                             className="text-xs mt-2"
                             style={{ color: "rgba(255,255,255,0.7)" }}
                         >
-                            {presensiToday
-                                ? "Semangat mengajar hari ini!"
-                                : "Jangan lupa absen ya!"}
+                            {izinHariIni
+                                ? `Anda ${izinHariIni.jenis_izin} hari ini`
+                                : presensiToday
+                                  ? "Semangat mengajar hari ini!"
+                                  : "Jangan lupa absen ya!"}
                         </p>
                     </div>
                 </div>

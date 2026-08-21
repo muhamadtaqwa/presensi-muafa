@@ -78,11 +78,11 @@ function DataGuru({ guru }) {
 
     return (
         <>
-            <div className="space-y-6">
+            <div className="space-y-4">
                 {/* Header */}
                 <div className="flex items-center justify-between flex-wrap gap-3">
                     <h2
-                        className="text-2xl font-bold"
+                        className="text-lg font-bold"
                         style={{ color: "#1F2937" }}
                     >
                         Data Guru
@@ -138,7 +138,7 @@ function DataGuru({ guru }) {
                         Belum ada data guru
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                         {guru.map((g) => (
                             <div
                                 key={g.id}
@@ -148,89 +148,78 @@ function DataGuru({ guru }) {
                                         "0 8px 20px rgba(13,115,119,0.08)",
                                 }}
                             >
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-3">
-                                            <div
-                                                className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                                                style={{
-                                                    background:
-                                                        "linear-gradient(135deg, #2DD4BF, #0D7377)",
-                                                }}
-                                            >
-                                                {g.name.charAt(0)}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p
-                                                    className="font-semibold text-sm truncate"
-                                                    style={{ color: "#1F2937" }}
-                                                >
-                                                    {g.name}
-                                                </p>
-                                                <p
-                                                    className="text-xs truncate"
-                                                    style={{ color: "#9CA3AF" }}
-                                                >
-                                                    {g.jabatan ||
-                                                        "Tanpa Jabatan"}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-3 space-y-1.5">
-                                            <div className="flex items-center gap-2 text-xs">
-                                                <span
-                                                    style={{ color: "#9CA3AF" }}
-                                                >
-                                                    NIP:
-                                                </span>
-                                                <span
-                                                    className="font-medium"
-                                                    style={{ color: "#1F2937" }}
-                                                >
-                                                    {g.nip || "-"}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs">
-                                                <span
-                                                    style={{ color: "#9CA3AF" }}
-                                                >
-                                                    Username:
-                                                </span>
-                                                <span
-                                                    className="font-medium"
-                                                    style={{ color: "#1F2937" }}
-                                                >
-                                                    {g.username}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-2 flex-shrink-0">
-                                        <button
-                                            onClick={() => openEdit(g)}
-                                            className="px-4 py-2 rounded-full text-xs font-semibold transition-all"
-                                            style={{
-                                                background: "#F0FDFA",
-                                                color: "#0D7377",
-                                            }}
+                                {/* Info Guru - Kanan Kiri */}
+                                <div className="space-y-2 mb-4">
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span style={{ color: "#9CA3AF" }}>
+                                            Nama
+                                        </span>
+                                        <span
+                                            className="font-semibold text-sm"
+                                            style={{ color: "#1F2937" }}
                                         >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                handleDelete(g.id, g.name)
-                                            }
-                                            className="px-4 py-2 rounded-full text-xs font-semibold transition-all"
-                                            style={{
-                                                background: "#FEE2E2",
-                                                color: "#DC2626",
-                                            }}
-                                        >
-                                            Hapus
-                                        </button>
+                                            {g.name}
+                                        </span>
                                     </div>
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span style={{ color: "#9CA3AF" }}>
+                                            Username
+                                        </span>
+                                        <span
+                                            className="font-semibold"
+                                            style={{ color: "#1F2937" }}
+                                        >
+                                            {g.username}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span style={{ color: "#9CA3AF" }}>
+                                            NIP
+                                        </span>
+                                        <span
+                                            className="font-semibold"
+                                            style={{ color: "#1F2937" }}
+                                        >
+                                            {g.nip || "-"}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span style={{ color: "#9CA3AF" }}>
+                                            Jabatan
+                                        </span>
+                                        <span
+                                            className="font-semibold"
+                                            style={{ color: "#1F2937" }}
+                                        >
+                                            {g.jabatan || "-"}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Aksi */}
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        onClick={() => openEdit(g)}
+                                        className="py-2 rounded-full text-xs font-semibold transition-all"
+                                        style={{
+                                            background: "#F0FDFA",
+                                            color: "#0D7377",
+                                        }}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            handleDelete(g.id, g.name)
+                                        }
+                                        className="py-2 rounded-full text-xs font-semibold transition-all"
+                                        style={{
+                                            background: "#FEE2E2",
+                                            color: "#DC2626",
+                                        }}
+                                    >
+                                        Hapus
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -255,11 +244,11 @@ function DataGuru({ guru }) {
                                 {editMode ? "Edit Guru" : "Tambah Guru"}
                             </h3>
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div>
+                            <form onSubmit={handleSubmit} className="space-y-3">
+                                <div className="flex items-center gap-3">
                                     <label
-                                        className="block text-xs font-semibold mb-1.5"
-                                        style={{ color: "#1F2937" }}
+                                        className="text-xs w-28 flex-shrink-0"
+                                        style={{ color: "#9CA3AF" }}
                                     >
                                         Username
                                     </label>
@@ -269,16 +258,15 @@ function DataGuru({ guru }) {
                                         onChange={(e) =>
                                             setData("username", e.target.value)
                                         }
-                                        className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
-                                        placeholder="Masukkan username"
+                                        className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                         required
                                     />
                                 </div>
 
-                                <div>
+                                <div className="flex items-center gap-3">
                                     <label
-                                        className="block text-xs font-semibold mb-1.5"
-                                        style={{ color: "#1F2937" }}
+                                        className="text-xs w-28 flex-shrink-0"
+                                        style={{ color: "#9CA3AF" }}
                                     >
                                         Nama Lengkap
                                     </label>
@@ -288,20 +276,17 @@ function DataGuru({ guru }) {
                                         onChange={(e) =>
                                             setData("name", e.target.value)
                                         }
-                                        className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
-                                        placeholder="Masukkan nama lengkap"
+                                        className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                         required
                                     />
                                 </div>
 
-                                <div>
+                                <div className="flex items-center gap-3">
                                     <label
-                                        className="block text-xs font-semibold mb-1.5"
-                                        style={{ color: "#1F2937" }}
+                                        className="text-xs w-28 flex-shrink-0"
+                                        style={{ color: "#9CA3AF" }}
                                     >
-                                        Password{" "}
-                                        {editMode &&
-                                            "(kosongkan jika tidak diubah)"}
+                                        Password {editMode && "(kosongkan)"}
                                     </label>
                                     <input
                                         type="password"
@@ -309,16 +294,15 @@ function DataGuru({ guru }) {
                                         onChange={(e) =>
                                             setData("password", e.target.value)
                                         }
-                                        className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
-                                        placeholder="Masukkan password"
+                                        className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                         required={!editMode}
                                     />
                                 </div>
 
-                                <div>
+                                <div className="flex items-center gap-3">
                                     <label
-                                        className="block text-xs font-semibold mb-1.5"
-                                        style={{ color: "#1F2937" }}
+                                        className="text-xs w-28 flex-shrink-0"
+                                        style={{ color: "#9CA3AF" }}
                                     >
                                         NIP
                                     </label>
@@ -328,15 +312,14 @@ function DataGuru({ guru }) {
                                         onChange={(e) =>
                                             setData("nip", e.target.value)
                                         }
-                                        className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
-                                        placeholder="Masukkan NIP"
+                                        className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                     />
                                 </div>
 
-                                <div>
+                                <div className="flex items-center gap-3">
                                     <label
-                                        className="block text-xs font-semibold mb-1.5"
-                                        style={{ color: "#1F2937" }}
+                                        className="text-xs w-28 flex-shrink-0"
+                                        style={{ color: "#9CA3AF" }}
                                     >
                                         Jabatan
                                     </label>
@@ -346,16 +329,15 @@ function DataGuru({ guru }) {
                                         onChange={(e) =>
                                             setData("jabatan", e.target.value)
                                         }
-                                        className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
-                                        placeholder="Masukkan jabatan"
+                                        className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                     />
                                 </div>
 
-                                <div className="flex gap-3 pt-2">
+                                <div className="flex gap-2 pt-2">
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="flex-1 py-3 rounded-full text-white font-semibold text-sm transition-all disabled:opacity-50"
+                                        className="flex-1 py-2.5 rounded-full text-white font-semibold text-sm transition-all disabled:opacity-50"
                                         style={{
                                             background:
                                                 "linear-gradient(135deg, #2DD4BF, #0D7377)",
@@ -368,7 +350,7 @@ function DataGuru({ guru }) {
                                     <button
                                         type="button"
                                         onClick={() => setShowModal(false)}
-                                        className="px-6 py-3 rounded-full text-sm font-semibold transition-all"
+                                        className="px-5 py-2.5 rounded-full text-sm font-semibold transition-all"
                                         style={{
                                             background: "#F0FDFA",
                                             color: "#0D7377",
