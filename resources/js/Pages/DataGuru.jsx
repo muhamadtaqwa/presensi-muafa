@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm } from "@inertiajs/react";
+import { useForm, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "./Layouts/AppLayout";
 
@@ -64,8 +64,7 @@ function DataGuru({ guru }) {
 
     const handleDelete = (id, name) => {
         if (confirm(`Yakin ingin menghapus ${name}?`)) {
-            const form = useForm();
-            form.delete(`/data-guru/${id}`, {
+            router.delete(`/data-guru/${id}`, {
                 onSuccess: () => {
                     toast.success("Guru berhasil dihapus");
                 },
@@ -148,7 +147,6 @@ function DataGuru({ guru }) {
                                         "0 8px 20px rgba(13,115,119,0.08)",
                                 }}
                             >
-                                {/* Info Guru - Kanan Kiri */}
                                 <div className="space-y-2 mb-4">
                                     <div className="flex justify-between items-center text-xs">
                                         <span style={{ color: "#9CA3AF" }}>
@@ -196,7 +194,6 @@ function DataGuru({ guru }) {
                                     </div>
                                 </div>
 
-                                {/* Aksi */}
                                 <div className="grid grid-cols-2 gap-2">
                                     <button
                                         onClick={() => openEdit(g)}
@@ -226,28 +223,28 @@ function DataGuru({ guru }) {
                     </div>
                 )}
 
-                {/* Modal Tambah/Edit */}
+                {/* Modal Tambah/Edit - Tetap Tengah */}
                 {showModal && (
                     <div
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
                         onClick={() => setShowModal(false)}
                     >
                         <div
-                            className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto"
+                            className="bg-white rounded-2xl w-full max-w-md p-5 max-h-[85vh] overflow-y-auto"
                             style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <h3
-                                className="font-bold text-lg mb-4"
+                                className="font-bold text-base mb-4 text-center"
                                 style={{ color: "#1F2937" }}
                             >
                                 {editMode ? "Edit Guru" : "Tambah Guru"}
                             </h3>
 
                             <form onSubmit={handleSubmit} className="space-y-3">
-                                <div className="flex items-center gap-3">
+                                <div>
                                     <label
-                                        className="text-xs w-28 flex-shrink-0"
+                                        className="text-xs block mb-1"
                                         style={{ color: "#9CA3AF" }}
                                     >
                                         Username
@@ -258,14 +255,14 @@ function DataGuru({ guru }) {
                                         onChange={(e) =>
                                             setData("username", e.target.value)
                                         }
-                                        className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                        className="w-full px-3 py-2.5 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                         required
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-3">
+                                <div>
                                     <label
-                                        className="text-xs w-28 flex-shrink-0"
+                                        className="text-xs block mb-1"
                                         style={{ color: "#9CA3AF" }}
                                     >
                                         Nama Lengkap
@@ -276,17 +273,17 @@ function DataGuru({ guru }) {
                                         onChange={(e) =>
                                             setData("name", e.target.value)
                                         }
-                                        className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                        className="w-full px-3 py-2.5 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                         required
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-3">
+                                <div>
                                     <label
-                                        className="text-xs w-28 flex-shrink-0"
+                                        className="text-xs block mb-1"
                                         style={{ color: "#9CA3AF" }}
                                     >
-                                        Password {editMode && "(kosongkan)"}
+                                        Password {editMode && "(opsional)"}
                                     </label>
                                     <input
                                         type="password"
@@ -294,14 +291,14 @@ function DataGuru({ guru }) {
                                         onChange={(e) =>
                                             setData("password", e.target.value)
                                         }
-                                        className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                        className="w-full px-3 py-2.5 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                         required={!editMode}
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-3">
+                                <div>
                                     <label
-                                        className="text-xs w-28 flex-shrink-0"
+                                        className="text-xs block mb-1"
                                         style={{ color: "#9CA3AF" }}
                                     >
                                         NIP
@@ -312,13 +309,13 @@ function DataGuru({ guru }) {
                                         onChange={(e) =>
                                             setData("nip", e.target.value)
                                         }
-                                        className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                        className="w-full px-3 py-2.5 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-3">
+                                <div>
                                     <label
-                                        className="text-xs w-28 flex-shrink-0"
+                                        className="text-xs block mb-1"
                                         style={{ color: "#9CA3AF" }}
                                     >
                                         Jabatan
@@ -329,7 +326,7 @@ function DataGuru({ guru }) {
                                         onChange={(e) =>
                                             setData("jabatan", e.target.value)
                                         }
-                                        className="flex-1 px-3 py-2 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
+                                        className="w-full px-3 py-2.5 border-2 border-teal-100 rounded-xl focus:border-teal-400 focus:outline-none transition-colors text-sm bg-teal-50/30"
                                     />
                                 </div>
 
@@ -350,7 +347,7 @@ function DataGuru({ guru }) {
                                     <button
                                         type="button"
                                         onClick={() => setShowModal(false)}
-                                        className="px-5 py-2.5 rounded-full text-sm font-semibold transition-all"
+                                        className="flex-1 py-2.5 rounded-full text-sm font-semibold transition-all"
                                         style={{
                                             background: "#F0FDFA",
                                             color: "#0D7377",

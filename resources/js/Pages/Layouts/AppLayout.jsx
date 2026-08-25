@@ -148,7 +148,7 @@ export default function AppLayout({ children, header }) {
                 {/* User & Logout */}
                 <div className="p-3 border-t border-white/10">
                     <div
-                        className={`flex items-center gap-3 ${collapsed ? "justify-center" : ""} mb-2`}
+                        className={`flex items-center gap-3 ${collapsed ? "justify-center" : ""} mb-2 px-3`}
                     >
                         <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                             <span className="text-white font-bold text-sm">
@@ -166,18 +166,20 @@ export default function AppLayout({ children, header }) {
                             </div>
                         )}
                     </div>
+
+                    {/* Logout samakan menu lain */}
                     <Link
                         href="/logout"
                         method="post"
                         as="button"
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold ${
+                        className={`flex items-center gap-3 px-3 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all text-xs font-semibold w-full ${
                             collapsed ? "justify-center" : ""
                         }`}
                         title={collapsed ? "Logout" : ""}
                     >
-                        <LogOut size={18} />
+                        <LogOut size={20} className="flex-shrink-0" />
                         {!collapsed && (
-                            <span className="text-left">Logout</span>
+                            <span className="text-sm text-left">Logout</span>
                         )}
                     </Link>
                 </div>

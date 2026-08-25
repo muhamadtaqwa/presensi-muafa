@@ -10,9 +10,7 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
-        return Inertia::render('Auth/Login', [
-            'errors' => [],
-        ]);
+        return Inertia::render('Auth/Login');
     }
 
     public function login(Request $request)
@@ -29,7 +27,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'username' => 'Username atau password salah.',
+            'auth' => 'Username atau password salah.',
         ]);
     }
 
