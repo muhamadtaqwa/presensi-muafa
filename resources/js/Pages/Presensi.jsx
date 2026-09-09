@@ -14,7 +14,9 @@ function Presensi({ presensi, izinHariIni, today, riwayat }) {
     const [jamPulang, setJamPulang] = useState(null);
     const [showKamera, setShowKamera] = useState(false);
     const [previewFoto, setPreviewFoto] = useState(null);
-    const [facingMode, setFacingMode] = useState("environment");
+    // Default "user" karena kamera laptop pada dasarnya kamera depan/selfie.
+    // Untuk HP, user tetap bisa switch ke "environment" (kamera belakang).
+    const [facingMode, setFacingMode] = useState("user");
     const [processing, setProcessing] = useState(false);
     const [batalkanProcessing, setBatalkanProcessing] = useState(false);
     const videoRef = useRef(null);
@@ -73,6 +75,35 @@ function Presensi({ presensi, izinHariIni, today, riwayat }) {
             }
         }
     }, [presensi]);
+
+    // Cleanup kamera kalau komponen unmount saat stream masih aktif
+    useEffect(() => {
+        return () => {
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach((track) => track.stop());
+                streamRef.current = null;
+            }
+        };
+    }, []);
+
+    // Ambil sudut orientasi layar saat ini (0, 90, 180, -90/270)
+    // Dipakai untuk mengoreksi rotasi hasil capture di HP (landscape/portrait)
+    const getOrientationAngle = () => {
+        if (
+            typeof screen !== "undefined" &&
+            screen.orientation &&
+            typeof screen.orientation.angle === "number"
+        ) {
+            return screen.orientation.angle;
+        }
+        if (
+            typeof window !== "undefined" &&
+            typeof window.orientation === "number"
+        ) {
+            return window.orientation;
+        }
+        return 0;
+    };
 
     const getLokasi = () => {
         setLoadingLokasi(true);
@@ -160,22 +191,52 @@ function Presensi({ presensi, izinHariIni, today, riwayat }) {
         const video = videoRef.current;
         if (!video) return;
 
+        // Validasi ulang lokasi — bisa saja hilang setelah kamera dibuka
+        if (!lokasi) {
+            toast.error("Lokasi tidak tersedia, ambil lokasi ulang");
+            tutupKamera();
+            return;
+        }
+
+        const vw = video.videoWidth;
+        const vh = video.videoHeight;
+        if (!vw || !vh) return;
+
+        // Koreksi rotasi berdasarkan orientasi layar (khusus HP).
+        // Beberapa browser mobile tidak otomatis merotasi frame video
+        // mentah sesuai orientasi fisik device, walau preview di layar
+        // sudah terlihat "benar" secara visual (CSS-level).
+        const angle = ((getOrientationAngle() % 360) + 360) % 360; // normalisasi 0-359
+        const swapDims = angle === 90 || angle === 270;
+
         const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = swapDims ? vh : vw;
+        canvas.height = swapDims ? vw : vh;
         const ctx = canvas.getContext("2d");
 
-        // Flip kalau kamera depan
+        ctx.save();
+
+        // Pindahkan origin ke tengah canvas untuk rotasi & mirror
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+
+        if (angle === 90) {
+            ctx.rotate((-90 * Math.PI) / 180);
+        } else if (angle === 180) {
+            ctx.rotate((180 * Math.PI) / 180);
+        } else if (angle === 270) {
+            ctx.rotate((90 * Math.PI) / 180);
+        }
+
+        // Flip horizontal kalau kamera depan (selfie), supaya hasil foto
+        // konsisten dengan apa yang dilihat user di preview (mirrored)
         if (facingMode === "user") {
-            ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
         }
 
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
+        ctx.restore();
 
-        const koordinat = lokasi
-            ? `${lokasi.lat}, ${lokasi.long}`
-            : "Lokasi tidak tersedia";
+        const koordinat = `${lokasi.lat}, ${lokasi.long}`;
         const waktu = jam.toLocaleTimeString("id-ID", {
             hour: "2-digit",
             minute: "2-digit",
@@ -394,7 +455,18 @@ function Presensi({ presensi, izinHariIni, today, riwayat }) {
                             className="w-full rounded-xl"
                             autoPlay
                             playsInline
-                            style={{ maxHeight: "400px", background: "#000" }}
+                            muted
+                            style={{
+                                maxHeight: "400px",
+                                background: "#000",
+                                // Mirror preview kalau kamera depan, supaya user melihat
+                                // dirinya sendiri seperti di cermin (sesuai kebiasaan)
+                                // dan konsisten dengan hasil foto yang juga di-mirror.
+                                transform:
+                                    facingMode === "user"
+                                        ? "scaleX(-1)"
+                                        : "none",
+                            }}
                         />
                         <div className="flex gap-2 mt-3">
                             <button
